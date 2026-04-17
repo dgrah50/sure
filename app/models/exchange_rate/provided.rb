@@ -43,8 +43,8 @@ module ExchangeRate::Provided
       rate = response.data
       begin
         ExchangeRate.find_or_create_by!(
-          from_currency: rate.from,
-          to_currency: rate.to,
+          from_currency: rate.from_currency,
+          to_currency: rate.to_currency,
           date: rate.date
         ) do |exchange_rate|
           exchange_rate.rate = rate.rate
@@ -53,8 +53,8 @@ module ExchangeRate::Provided
         # Race condition: another process inserted between our SELECT and INSERT
         # Retry by finding the existing record
         ExchangeRate.find_by!(
-          from_currency: rate.from,
-          to_currency: rate.to,
+          from_currency: rate.from_currency,
+          to_currency: rate.to_currency,
           date: rate.date
         ) if cache
       end
@@ -131,9 +131,5 @@ module ExchangeRate::Provided
     def fixed_rate?
       true
     end
-
-    # Convenience accessor aliases to match ExchangeRate attribute names
-    alias_method :from, :from_currency
-    alias_method :to, :to_currency
   end
 end

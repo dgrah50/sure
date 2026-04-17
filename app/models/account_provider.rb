@@ -14,7 +14,7 @@ class AccountProvider < ApplicationRecord
 
   # Returns the provider adapter for this connection
   def adapter
-    Provider::Factory.create_adapter(provider, account: account)
+    Provider::AccountAdapterFactory.create(self)
   end
 
   # Convenience method to get provider name

@@ -19,9 +19,9 @@ class IndexaCapitalAccount::ProcessorTest < ActiveSupport::TestCase
     @indexa_capital_account.reload
   end
 
-  # ==========================================================================
+
   # Processor tests
-  # ==========================================================================
+
 
   test "processor initializes with indexa_capital_account" do
     processor = IndexaCapitalAccount::Processor.new(@indexa_capital_account)
@@ -63,9 +63,9 @@ class IndexaCapitalAccount::ProcessorTest < ActiveSupport::TestCase
     assert_in_delta 27093.01, @account.balance.to_f, 0.01
   end
 
-  # ==========================================================================
+
   # HoldingsProcessor tests
-  # ==========================================================================
+
 
   test "holdings processor creates holdings from fiscal-results payload" do
     @indexa_capital_account.update!(raw_holdings_payload: [

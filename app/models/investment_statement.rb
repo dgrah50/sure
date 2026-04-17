@@ -69,7 +69,6 @@ class InvestmentStatement
   def current_holdings
     return Holding.none unless investment_accounts.any?
 
-    # Get the latest holding for each security per account
     Holding
       .where(account_id: investment_account_ids)
       .where.not(qty: 0)

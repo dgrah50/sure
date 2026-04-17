@@ -108,10 +108,6 @@ class Provider::Eodhd < Provider
     end
   end
 
-  # ================================
-  #           Securities
-  # ================================
-
   def search_securities(symbol, country_code: nil, exchange_operating_mic: nil)
     with_provider_response do
       enforce_daily_limit!

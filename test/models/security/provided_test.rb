@@ -7,7 +7,7 @@ class Security::ProvidedTest < ActiveSupport::TestCase
     @security = securities(:aapl)
   end
 
-  # --- search_provider ---
+
 
   test "search_provider returns results from multiple providers" do
     provider_a = mock("provider_a")
@@ -125,7 +125,7 @@ class Security::ProvidedTest < ActiveSupport::TestCase
     assert_equal "GOOG", results.first.ticker
   end
 
-  # --- price_data_provider ---
+
 
   test "price_data_provider returns assigned provider" do
     provider = mock("tiingo_provider")
@@ -153,7 +153,7 @@ class Security::ProvidedTest < ActiveSupport::TestCase
     assert_equal fallback_provider, @security.price_data_provider
   end
 
-  # --- provider_status ---
+
 
   test "provider_status returns provider_unavailable when assigned provider disabled" do
     Security.stubs(:provider_for).with("tiingo").returns(nil)
@@ -172,7 +172,7 @@ class Security::ProvidedTest < ActiveSupport::TestCase
     assert_equal :ok, @security.provider_status
   end
 
-  # --- rank_search_results ---
+
 
   # Helper to build unsaved Security objects for ranking tests
   def build_result(ticker:, name: nil, country_code: nil, exchange_operating_mic: nil)

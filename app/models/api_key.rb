@@ -77,7 +77,6 @@ class ApiKey < ApplicationRecord
     update_column(:last_used_at, Time.current)
   end
 
-  # Get the plain text API key for display (automatically decrypted by Rails)
   def plain_key
     display_key
   end

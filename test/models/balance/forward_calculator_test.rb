@@ -4,9 +4,9 @@ require "test_helper"
 class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
   include LedgerTestingHelper
 
-  # ------------------------------------------------------------------------------------------------
+
   # General tests for all account types
-  # ------------------------------------------------------------------------------------------------
+
 
   # When syncing forwards, we don't care about the account balance.  We generate everything based on entries, starting from 0.
   test "no entries sync" do
@@ -200,9 +200,9 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     )
   end
 
-  # ------------------------------------------------------------------------------------------------
+
   # All Cash accounts (Depository, CreditCard)
-  # ------------------------------------------------------------------------------------------------
+
 
   test "transactions on depository accounts affect cash balance" do
     account = create_account_with_ledger(
@@ -471,9 +471,9 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     end
   end
 
-  # ------------------------------------------------------------------------------------------------
+
   # Hybrid accounts (Investment, Crypto) - these have both cash and non-cash balance components
-  # ------------------------------------------------------------------------------------------------
+
 
   # A transaction increases/decreases cash balance (i.e. "deposits" and "withdrawals")
   # A trade increases/decreases cash balance (i.e. "buys" and "sells", which consume/add "brokerage cash" and create/destroy "holdings")
@@ -581,9 +581,9 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     )
   end
 
-  # ------------------------------------------------------------------------------------------------
+
   # Incremental calculation (window_start_date)
-  # ------------------------------------------------------------------------------------------------
+
 
   test "incremental sync produces same results as full sync for the recalculated window" do
     account = create_account_with_ledger(

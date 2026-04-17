@@ -46,8 +46,18 @@ module Simplefin
       nm_norm = nm_raw.downcase.gsub(/[^a-z0-9]+/, " ").squeeze(" ").strip
       inst = institution.to_s
       holdings_present = holdings.is_a?(Array) && holdings.any?
-      bal = (balance.to_d rescue nil)
-      avail = (available_balance.to_d rescue nil)
+      begin
+        bal = balance.to_d
+      rescue ArgumentError
+        Rails.logger.error("Invalid balance format for account type inference: #{balance.inspect}, name: #{name.inspect}")
+        bal = nil
+      end
+      begin
+        avail = available_balance.to_d
+      rescue ArgumentError
+        Rails.logger.error("Invalid available_balance format for account type inference: #{available_balance.inspect}, name: #{name.inspect}")
+        avail = nil
+      end
 
       # 0) Explicit retirement/plan tokens → Investment with explicit subtype (match against normalized name)
       if (explicit_sub = EXPLICIT_INVESTMENT_TOKENS.find { |rx, _| nm_norm.match?(rx) }&.last)

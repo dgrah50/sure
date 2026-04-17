@@ -15,9 +15,9 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     @helper = TestHelper.new
   end
 
-  # ==========================================================================
+
   # parse_decimal tests
-  # ==========================================================================
+
 
   test "parse_decimal returns nil for nil input" do
     assert_nil @helper.parse_decimal(nil)
@@ -51,9 +51,9 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_nil @helper.parse_decimal("not a number")
   end
 
-  # ==========================================================================
+
   # parse_date tests
-  # ==========================================================================
+
 
   test "parse_date returns nil for nil input" do
     assert_nil @helper.parse_date(nil)
@@ -88,9 +88,9 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_nil @helper.parse_date("not a date")
   end
 
-  # ==========================================================================
+
   # extract_currency tests
-  # ==========================================================================
+
 
   test "extract_currency returns fallback for nil currency" do
     result = @helper.extract_currency({}, fallback: "USD")
@@ -112,9 +112,9 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_equal "GBP", result
   end
 
-  # ==========================================================================
+
   # resolve_security tests (investment providers only)
-  # ==========================================================================
+
 
   test "resolve_security returns nil for blank ticker" do
     assert_nil @helper.resolve_security("")
@@ -154,9 +154,9 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_equal "XYZ1", result.name
   end
 
-  # ==========================================================================
+
   # extract_security_name tests (investment providers only)
-  # ==========================================================================
+
 
   test "extract_security_name uses name field" do
     result = @helper.extract_security_name({ name: "Apple Inc" }, "AAPL")

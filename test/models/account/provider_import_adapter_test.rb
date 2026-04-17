@@ -786,9 +786,9 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
     end
   end
 
-  # ============================================================================
+
   # Pending→Posted Transaction Reconciliation Tests
-  # ============================================================================
+
 
   test "reconciles pending transaction when posted version arrives with different external_id" do
     # Simulate SimpleFIN giving different IDs for pending vs posted transactions
@@ -1095,9 +1095,9 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
     assert_nil result
   end
 
-  # ============================================================================
+
   # Critical Direction Fix Tests (CITGO Bug Prevention)
-  # ============================================================================
+
 
   test "does not match pending transaction that is AFTER the posted date (direction fix)" do
     # This is the CITGO bug scenario:
@@ -1183,9 +1183,9 @@ class Account::ProviderImportAdapterTest < ActiveSupport::TestCase
     assert_equal past_pending.id, result.id
   end
 
-  # ============================================================================
+
   # Plaid pending_transaction_id Tests
-  # ============================================================================
+
 
   test "reconciles pending via Plaid pending_transaction_id" do
     # Import a pending transaction

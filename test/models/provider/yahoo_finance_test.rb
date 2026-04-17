@@ -5,9 +5,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     @provider = Provider::YahooFinance.new
   end
 
-  # ================================
+
   #        Health Check Tests
-  # ================================
+
 
   test "healthy? returns true when API is working" do
     mock_response = mock
@@ -46,9 +46,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert @provider.healthy?
   end
 
-  # ================================
+
   #      Exchange Rate Tests
-  # ================================
+
 
   test "fetch_exchange_rate returns 1.0 for same currency" do
     date = Date.parse("2024-01-15")
@@ -103,9 +103,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_instance_of Provider::YahooFinance::Error, response.error
   end
 
-  # ================================
+
   #       Security Search Tests
-  # ================================
+
 
   test "search_securities handles invalid symbols" do
     # With validation removed, invalid symbols will result in API errors
@@ -135,9 +135,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_equal [], response.data
   end
 
-  # ================================
+
   #     Security Price Tests
-  # ================================
+
 
   test "fetch_security_price handles invalid symbol" do
     date = Date.parse("2024-01-15")
@@ -148,16 +148,16 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_instance_of Provider::YahooFinance::Error, response.error
   end
 
-  # ================================
+
   #         Caching Tests
-  # ================================
+
 
   # Note: Caching tests are skipped as Rails.cache may not be properly configured in test environment
   # and caching functionality is not the focus of the validation fixes
 
-  # ================================
+
   #       Error Handling Tests
-  # ================================
+
 
   test "handles Faraday errors gracefully" do
     # Mock a Faraday error
@@ -194,9 +194,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     end
   end
 
-  # ================================
+
   #     User-Agent Rotation Tests
-  # ================================
+
 
   test "random_user_agent returns value from USER_AGENTS pool" do
     user_agent = @provider.send(:random_user_agent)
@@ -208,9 +208,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert Provider::YahooFinance::USER_AGENTS.all? { |ua| ua.include?("Mozilla") }
   end
 
-  # ================================
+
   #       Throttling Tests
-  # ================================
+
 
   test "throttle_request enforces minimum interval between requests" do
     # First request should not wait
@@ -227,9 +227,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert second_elapsed >= (min_interval - 0.05), "Second request should wait at least #{min_interval - 0.05}s"
   end
 
-  # ================================
+
   #    Configuration Tests
-  # ================================
+
 
   test "max_retries returns default value" do
     assert_equal 5, @provider.send(:max_retries)
@@ -243,9 +243,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_equal 0.5, @provider.send(:min_request_interval)
   end
 
-  # ================================
+
   #  Cookie/Crumb Authentication Tests
-  # ================================
+
 
   test "extract_cookie extracts cookie from set-cookie header" do
     mock_response = OpenStruct.new(
@@ -286,9 +286,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_nil Rails.cache.read("yahoo_finance_auth_crumb")
   end
 
-  # ================================
+
   #       Helper Method Tests
-  # ================================
+
 
   test "map_country_code returns correct codes for exchanges" do
     assert_equal "US", @provider.send(:map_country_code, "NASDAQ")
@@ -338,9 +338,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     end
   end
 
-  # ================================
+
   #   Currency Normalization Tests
-  # ================================
+
 
   test "normalize_currency_and_price converts GBp to GBP" do
     currency, price = @provider.send(:normalize_currency_and_price, "GBp", 1234.56)

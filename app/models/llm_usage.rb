@@ -79,7 +79,6 @@ class LlmUsage < ApplicationRecord
   end
 
   # Infer provider from model name by checking which provider has pricing for it
-  # Returns the provider name if found, or "openai" as default (for backward compatibility)
   def self.infer_provider(model)
     return "openai" if model.blank?
 
@@ -133,12 +132,10 @@ class LlmUsage < ApplicationRecord
     metadata.present? && metadata["error"].present?
   end
 
-  # Get the HTTP status code from metadata
   def http_status_code
     metadata&.dig("http_status_code")
   end
 
-  # Get the error message from metadata
   def error_message
     metadata&.dig("error")
   end

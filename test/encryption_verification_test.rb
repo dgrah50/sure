@@ -9,9 +9,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     skip "Encryption not configured" unless User.encryption_ready?
   end
 
-  # ============================================================================
+
   # USER MODEL TESTS
-  # ============================================================================
+
 
   test "user email is encrypted and can be looked up" do
     user = User.create!(
@@ -99,9 +99,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     user.update!(unconfirmed_email: nil)
   end
 
-  # ============================================================================
+
   # INVITATION MODEL TESTS
-  # ============================================================================
+
 
   test "invitation token is encrypted and lookups work" do
     invitation = Invitation.create!(
@@ -142,9 +142,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     invitation1.destroy
   end
 
-  # ============================================================================
+
   # INVITE CODE MODEL TESTS
-  # ============================================================================
+
 
   test "invite code token is encrypted and claim works" do
     token = InviteCode.generate!
@@ -170,9 +170,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     invite_code.destroy
   end
 
-  # ============================================================================
+
   # SESSION MODEL TESTS
-  # ============================================================================
+
 
   test "session user_agent is encrypted" do
     Current.user_agent = "Mozilla/5.0 Test Browser"
@@ -199,9 +199,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     end
   end
 
-  # ============================================================================
+
   # MOBILE DEVICE MODEL TESTS
-  # ============================================================================
+
 
   test "mobile device device_id is encrypted and uniqueness works" do
     device = MobileDevice.create!(
@@ -236,9 +236,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     device.destroy
   end
 
-  # ============================================================================
+
   # PROVIDER ITEM TESTS (if fixtures exist)
-  # ============================================================================
+
 
   test "lunchflow item credentials and payloads are encrypted" do
     skip "No lunchflow items in fixtures" unless LunchflowItem.any?
@@ -280,9 +280,9 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     account.update!(raw_payload: original_payload)
   end
 
-  # ============================================================================
+
   # DATABASE VERIFICATION TESTS
-  # ============================================================================
+
 
   test "encrypted fields are not stored as plaintext in database" do
     user = User.create!(

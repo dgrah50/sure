@@ -117,7 +117,6 @@ module SnaptradeItem::Provided
     false
   end
 
-  # Get the connection portal URL for linking brokerages
   def connection_portal_url(redirect_url:, broker: nil)
     raise StandardError, "User not registered with SnapTrade" unless user_registered?
 
