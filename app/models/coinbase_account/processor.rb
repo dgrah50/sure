@@ -124,24 +124,13 @@ class CoinbaseAccount::Processor
     def process_trades
       return unless coinbase_account.raw_transactions_payload.present?
 
-      # New format uses "transactions" array from /v2/accounts/{id}/transactions endpoint
       transactions = coinbase_account.raw_transactions_payload["transactions"] || []
 
-      # Legacy format support (buys/sells arrays from deprecated endpoints)
-      buys = coinbase_account.raw_transactions_payload["buys"] || []
-      sells = coinbase_account.raw_transactions_payload["sells"] || []
-
       Rails.logger.info(
-        "CoinbaseAccount::Processor - Processing #{transactions.count} transactions, " \
-        "#{buys.count} legacy buys, #{sells.count} legacy sells"
+        "CoinbaseAccount::Processor - Processing #{transactions.count} transactions"
       )
 
-      # Process new format transactions
       transactions.each { |txn| process_transaction(txn) }
-
-      # Process legacy format (for backwards compatibility)
-      buys.each { |buy| process_legacy_buy(buy) }
-      sells.each { |sell| process_legacy_sell(sell) }
     rescue StandardError => e
       report_exception(e, "trades")
     end
@@ -245,96 +234,6 @@ class CoinbaseAccount::Processor
       end
     rescue => e
       Rails.logger.error "CoinbaseAccount::Processor - Failed to process transaction #{txn_data['id']}: #{e.message}"
-    end
-
-    # Legacy format processor for buy transactions (deprecated endpoint)
-    def process_legacy_buy(buy_data)
-      return unless buy_data["status"] == "completed"
-
-      account = coinbase_account.current_account
-      return unless account
-
-      security = find_or_create_security(buy_data)
-      return unless security
-
-      date = Time.zone.parse(buy_data["created_at"]).to_date
-      qty = buy_data.dig("amount", "amount").to_d
-      price = buy_data.dig("unit_price", "amount").to_d
-      total = buy_data.dig("total", "amount").to_d
-      currency = buy_data.dig("total", "currency") || native_currency
-
-      external_id = "coinbase_buy_#{buy_data['id']}"
-      existing = account.entries.find_by(external_id: external_id)
-      if existing.present?
-        # Update activity label if missing
-        if existing.entryable.is_a?(Trade) && existing.entryable.investment_activity_label.blank?
-          existing.entryable.update!(investment_activity_label: "Buy")
-        end
-        return
-      end
-
-      account.entries.create!(
-        date: date,
-        name: "Buy #{security.ticker}",
-        amount: -total,
-        currency: currency,
-        external_id: external_id,
-        source: "coinbase",
-        entryable: Trade.new(
-          security: security,
-          qty: qty,
-          price: price,
-          currency: currency,
-          investment_activity_label: "Buy"
-        )
-      )
-    rescue => e
-      Rails.logger.error "CoinbaseAccount::Processor - Failed to process legacy buy: #{e.message}"
-    end
-
-    # Legacy format processor for sell transactions (deprecated endpoint)
-    def process_legacy_sell(sell_data)
-      return unless sell_data["status"] == "completed"
-
-      account = coinbase_account.current_account
-      return unless account
-
-      security = find_or_create_security(sell_data)
-      return unless security
-
-      date = Time.zone.parse(sell_data["created_at"]).to_date
-      qty = sell_data.dig("amount", "amount").to_d
-      price = sell_data.dig("unit_price", "amount").to_d
-      total = sell_data.dig("total", "amount").to_d
-      currency = sell_data.dig("total", "currency") || native_currency
-
-      external_id = "coinbase_sell_#{sell_data['id']}"
-      existing = account.entries.find_by(external_id: external_id)
-      if existing.present?
-        # Update activity label if missing
-        if existing.entryable.is_a?(Trade) && existing.entryable.investment_activity_label.blank?
-          existing.entryable.update!(investment_activity_label: "Sell")
-        end
-        return
-      end
-
-      account.entries.create!(
-        date: date,
-        name: "Sell #{security.ticker}",
-        amount: total,
-        currency: currency,
-        external_id: external_id,
-        source: "coinbase",
-        entryable: Trade.new(
-          security: security,
-          qty: -qty,
-          price: price,
-          currency: currency,
-          investment_activity_label: "Sell"
-        )
-      )
-    rescue => e
-      Rails.logger.error "CoinbaseAccount::Processor - Failed to process legacy sell: #{e.message}"
     end
 
     def find_or_create_security(transaction_data)

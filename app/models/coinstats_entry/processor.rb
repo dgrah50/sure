@@ -34,11 +34,7 @@ class CoinstatsEntry::Processor
     end
 
     if exchange_trade? && trade_security.present?
-      return legacy_transaction_entry if skip_legacy_transaction_migration?
-
       Account.transaction do
-        remove_legacy_transaction_entry!
-
         import_adapter.import_trade(
           external_id: external_id,
           security: trade_security,
@@ -378,28 +374,6 @@ class CoinstatsEntry::Processor
 
     def normalized_transaction_type
       @normalized_transaction_type ||= transaction_type.to_s.downcase.parameterize(separator: "_")
-    end
-
-    def remove_legacy_transaction_entry!
-      legacy_transaction_entry&.destroy!
-    end
-
-    def legacy_transaction_entry
-      @legacy_transaction_entry ||= account.entries.find_by(
-        external_id: external_id,
-        source: "coinstats",
-        entryable_type: "Transaction"
-      )
-    end
-
-    def skip_legacy_transaction_migration?
-      return false unless legacy_transaction_entry.present?
-
-      skip_reason = import_adapter.send(:determine_skip_reason, legacy_transaction_entry)
-      return false if skip_reason.blank?
-
-      import_adapter.send(:record_skip, legacy_transaction_entry, skip_reason)
-      true
     end
 
     def matched_symbol

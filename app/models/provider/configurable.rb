@@ -1,52 +1,5 @@
-# Module for providers to declare their configuration requirements
-#
-# Providers can declare their own configuration fields without needing to modify
-# the Setting model. Settings are stored dynamically as individual entries using
-# RailsSettings::Base's bracket-style access (Setting[:key] = value).
-#
-# Configuration fields are automatically registered and displayed in the UI at
-# /settings/providers. The system checks Setting storage first, then ENV variables,
-# then falls back to defaults.
-#
-# Example usage in an adapter:
-#   class Provider::PlaidAdapter < Provider::Base
-#     include Provider::Configurable
-#
-#     configure do
-#       description <<~DESC
-#         Setup instructions:
-#         1. Visit [Plaid Dashboard](https://dashboard.plaid.com) to get your API credentials
-#         2. Configure your Client ID and Secret Key below
-#       DESC
-#
-#       field :client_id,
-#             label: "Client ID",
-#             required: true,
-#             env_key: "PLAID_CLIENT_ID",
-#             description: "Your Plaid Client ID from the dashboard"
-#
-#       field :secret,
-#             label: "Secret Key",
-#             required: true,
-#             secret: true,
-#             env_key: "PLAID_SECRET",
-#             description: "Your Plaid Secret key"
-#
-#       field :environment,
-#             label: "Environment",
-#             required: false,
-#             env_key: "PLAID_ENV",
-#             default: "sandbox",
-#             description: "Plaid environment: sandbox, development, or production"
-#     end
-#   end
-#
-# The provider_key is automatically derived from the class name:
-#   Provider::PlaidAdapter -> "plaid"
-#   Provider::SimplefinAdapter -> "simplefin"
-#
-# Fields are stored with keys like "plaid_client_id", "plaid_secret", etc.
-# Access values via: configuration.get_value(:client_id) or field.value
+# Module for providers to declare their configuration requirements.
+# Fields are stored with keys like "plaid_client_id" and accessed via configuration.get_value(:field_name).
 module Provider::Configurable
   extend ActiveSupport::Concern
 
@@ -58,7 +11,6 @@ module Provider::Configurable
       Provider::ConfigurationRegistry.register(provider_key, @configuration, self)
     end
 
-    # Get the configuration for this provider
     def configuration
       @configuration || Provider::ConfigurationRegistry.get(provider_key)
     end
@@ -69,7 +21,6 @@ module Provider::Configurable
       name.demodulize.gsub(/Adapter$/, "").underscore
     end
 
-    # Get a configuration value
     def config_value(field_name)
       configuration&.get_value(field_name)
     end
@@ -116,8 +67,6 @@ module Provider::Configurable
       @configured_check = nil
     end
 
-    # Set the provider-level description (markdown supported)
-    # @param text [String] The description text for this provider
     def description(text)
       @provider_description = text
     end
@@ -199,13 +148,10 @@ module Provider::Configurable
       @provider_key = provider_key
     end
 
-    # Get the setting key for this field
-    # Example: plaid_client_id
     def setting_key
       "#{provider_key}_#{name}".to_sym
     end
 
-    # Get the value for this field (Setting -> ENV -> default)
     def value
       # First try Setting using dynamic bracket-style access
       # Each field is stored as an individual entry without explicit field declarations
@@ -233,8 +179,6 @@ module Provider::Configurable
       validate.empty?
     end
 
-    # Get validation errors for the current value
-    # Returns an array of error messages
     def validate
       errors = []
       current_value = value

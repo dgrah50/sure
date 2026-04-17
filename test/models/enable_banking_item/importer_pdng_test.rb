@@ -98,7 +98,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     assert_equal 1, result.count
   end
 
-  # --- PDNG transaction tagging ---
+
 
   test "tags PDNG transactions with pending: true in extra" do
     pdng_tx = {

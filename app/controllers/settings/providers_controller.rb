@@ -45,9 +45,7 @@ class Settings::ProvidersController < ApplicationController
 
         key_str = field.setting_key.to_s
 
-        # Check if the setting is a declared field in setting.rb
-        # Use method_defined? to check if the setter actually exists on the singleton class,
-        # not just respond_to? which returns true for dynamic fields due to respond_to_missing?
+        # Use method_defined? not respond_to? to avoid dynamic field false positives
         if Setting.singleton_class.method_defined?("#{key_str}=")
           # If it's a declared field (e.g., openai_model), set it directly.
           # This is safe and uses the proper setter.

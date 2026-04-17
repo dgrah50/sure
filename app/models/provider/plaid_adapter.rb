@@ -1,14 +1,4 @@
-# PlaidAdapter serves dual purposes:
-#
-# 1. Configuration Manager (class-level):
-#    - Manages Rails.application.config.plaid (US region)
-#    - Exposes 3 configurable fields in "Plaid" section of settings UI
-#    - PlaidEuAdapter separately manages EU region in "Plaid Eu" section
-#
-# 2. Instance Adapter (instance-level):
-#    - Wraps ALL PlaidAccount instances regardless of region (US or EU)
-#    - The PlaidAccount's plaid_item.plaid_region determines which config to use
-#    - Delegates to Provider::Registry.plaid_provider_for_region(region)
+# Manages Plaid US configuration and wraps PlaidAccount instances.
 class Provider::PlaidAdapter < Provider::Base
   include Provider::Syncable
   include Provider::InstitutionMetadata

@@ -51,6 +51,12 @@ export default class extends Controller {
     this._draw();
   }
 
+  /**
+   * Normalizes raw data points for D3 consumption
+   * Transforms date strings to Date objects and preserves other properties
+   * @returns {Array<{date: Date, date_formatted: string, value: (Object|number), trend: Object}>}
+   * @private
+   */
   _normalizeDataPoints() {
     this._normalDataPoints = (this.dataValue.values || []).map((d) => ({
       date: parseLocalDate(d.date),
@@ -384,6 +390,12 @@ export default class extends Controller {
       });
   }
 
+  /**
+   * Generates HTML template for tooltip display
+   * @param {{date_formatted: string, trend: {value: number, color: string, percent_formatted: string, current: (Object|number), previous: (Object|number)}}} datum - Normalized data point
+   * @returns {string} HTML string for tooltip content
+   * @private
+   */
   _tooltipTemplate(datum) {
     return `
       <div style="margin-bottom: 4px; color: var(--color-gray-500);">
@@ -410,6 +422,12 @@ export default class extends Controller {
     `;
   }
 
+  /**
+   * Returns SVG icon for trend direction (increase, decrease, or flat)
+   * @param {{trend: {color: string, current: {amount: string|number}, previous: {amount: string|number}}}} datum - Data point with trend info
+   * @returns {string} SVG string for trend indicator icon
+   * @private
+   */
   _getTrendIcon(datum) {
     const isIncrease =
       Number(datum.trend.previous.amount) < Number(datum.trend.current.amount);
@@ -427,10 +445,22 @@ export default class extends Controller {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${datum.trend.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus-icon lucide-minus"><path d="M5 12h14"/></svg>`;
   }
 
+  /**
+   * Gets the numeric value from a normalized data point
+   * @param {{value: (Object|number)}} datum - Normalized data point
+   * @returns {number} Numeric value extracted from datum
+   * @private
+   */
   _getDatumValue = (datum) => {
     return this._extractNumericValue(datum.value);
   };
 
+  /**
+   * Extracts numeric value from Money object or primitive number
+   * @param {(Object|number)} numeric - Money object with 'amount' property or primitive number
+   * @returns {number} Extracted numeric value
+   * @private
+   */
   _extractNumericValue = (numeric) => {
     if (typeof numeric === "object" && "amount" in numeric) {
       return Number(numeric.amount);
@@ -438,6 +468,12 @@ export default class extends Controller {
     return Number(numeric);
   };
 
+  /**
+   * Extracts formatted value string from Money object or returns primitive value
+   * @param {(Object|number|string)} numeric - Money object with 'formatted' property or primitive value
+   * @returns {string} Formatted value string or primitive as string
+   * @private
+   */
   _extractFormattedValue = (numeric) => {
     if (typeof numeric === "object" && "formatted" in numeric) {
       return numeric.formatted;
@@ -464,6 +500,11 @@ export default class extends Controller {
       .attr("transform", `translate(${this._margin.left},${this._margin.top})`);
   }
 
+  /**
+   * Gets or creates the main SVG element for the chart
+   * @returns {d3.Selection} D3 selection of the SVG element
+   * @private
+   */
   get _d3Svg() {
     if (!this._d3SvgMemo) {
       this._d3SvgMemo = this._createMainSvg();
@@ -471,6 +512,11 @@ export default class extends Controller {
     return this._d3SvgMemo;
   }
 
+  /**
+   * Gets or creates the main group element for chart content
+   * @returns {d3.Selection} D3 selection of the group element with margin transform applied
+   * @private
+   */
   get _d3Group() {
     if (!this._d3GroupMemo) {
       this._d3GroupMemo = this._createMainGroup();
@@ -478,6 +524,11 @@ export default class extends Controller {
     return this._d3GroupMemo;
   }
 
+  /**
+   * Gets the margin configuration for chart layout
+   * @returns {{top: number, right: number, bottom: number, left: number}} Margin object with pixel values
+   * @private
+   */
   get _margin() {
     if (this.useLabelsValue) {
       return { top: 20, right: 0, bottom: 10, left: 0 };
@@ -485,26 +536,51 @@ export default class extends Controller {
     return { top: 0, right: 0, bottom: 0, left: 0 };
   }
 
+  /**
+   * Gets the container width available for chart content (excluding margins)
+   * @returns {number} Width in pixels
+   * @private
+   */
   get _d3ContainerWidth() {
     return (
       this._d3InitialContainerWidth - this._margin.left - this._margin.right
     );
   }
 
+  /**
+   * Gets the container height available for chart content (excluding margins)
+   * @returns {number} Height in pixels
+   * @private
+   */
   get _d3ContainerHeight() {
     return (
       this._d3InitialContainerHeight - this._margin.top - this._margin.bottom
     );
   }
 
+  /**
+   * Gets the D3 selection of the chart container element
+   * @returns {d3.Selection} D3 selection of the controller's element
+   * @private
+   */
   get _d3Container() {
     return d3.select(this.element);
   }
 
+  /**
+   * Gets the trend color from the data value
+   * @returns {string} CSS color value
+   * @private
+   */
   get _trendColor() {
     return this.dataValue.trend.color;
   }
 
+  /**
+   * Gets the D3 line generator for trendline path creation
+   * @returns {d3.Line} D3 line generator configured for time series data
+   * @private
+   */
   get _d3Line() {
     return d3
       .line()
@@ -512,6 +588,11 @@ export default class extends Controller {
       .y((d) => this._d3YScale(this._getDatumValue(d)));
   }
 
+  /**
+   * Gets the D3 time scale for x-axis positioning
+   * @returns {d3.ScaleTime} D3 time scale mapping dates to pixel positions
+   * @private
+   */
   get _d3XScale() {
     return d3
       .scaleTime()
@@ -519,6 +600,12 @@ export default class extends Controller {
       .domain(d3.extent(this._normalDataPoints, (d) => d.date));
   }
 
+  /**
+   * Gets the D3 linear scale for y-axis positioning
+   * Handles edge cases like uniform values and includes dynamic baseline calculation
+   * @returns {d3.ScaleLinear} D3 linear scale mapping values to pixel positions
+   * @private
+   */
   get _d3YScale() {
     const dataMin = d3.min(this._normalDataPoints, this._getDatumValue);
     const dataMax = d3.max(this._normalDataPoints, this._getDatumValue);

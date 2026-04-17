@@ -34,6 +34,13 @@ export default class extends Controller {
     this.element.removeEventListener("mouseleave", this.#clearSegmentHover);
   }
 
+  /**
+   * Gets the transformed segment data for D3 pie chart rendering
+   * Filters out zero-amount segments, enforces minimum angles, and sorts segments
+   * (overage first, unused last, others by amount descending)
+   * @returns {Array<{id: string, name: string, amount: number, color: string}>} Array of segment objects
+   * @private
+   */
   get #data() {
     const totalPieValue = this.segmentsValue.reduce(
       (acc, s) => acc + Number(s.amount),
@@ -172,6 +179,14 @@ export default class extends Controller {
   };
 
   // Highlights segment and shows segment specific content (all other segments are grayed out)
+  /**
+   * Handles mouse hover over a donut segment
+   * Highlights the hovered segment and grays out others, shows segment-specific content
+   * Uses event.target.dataset.segmentId to identify the segment
+   * @param {MouseEvent} event - Mouse event from D3 event handler
+   * @returns {void}
+   * @private
+   */
   #handleSegmentHover(event) {
     const segmentId = event.target.dataset.segmentId;
     const template = this.element.querySelector(`#segment_${segmentId}`);
@@ -219,6 +234,13 @@ export default class extends Controller {
   };
 
   // Handles click on segment (optional, controlled by enableClick value)
+  /**
+   * Handles click on a donut segment
+   * Navigates to transactions page filtered by segment name and date range
+   * @param {{name: string, id: string, color: string}} segment - Segment data object
+   * @returns {void}
+   * @private
+   */
   #handleClick(segment) {
     if (!segment.name || !this.startDateValue || !this.endDateValue) return;
 

@@ -85,12 +85,29 @@ class SnaptradeActivitiesFetchJob < ApplicationJob
     snaptrade_account.update!(activities_fetch_pending: false)
     snaptrade_account.snaptrade_item.update!(status: :requires_update)
     snaptrade_account.snaptrade_item.broadcast_sync_complete
+  rescue Provider::Snaptrade::ApiError => e
+    Rails.logger.error("SnaptradeActivitiesFetchJob - API error for account #{snaptrade_account.id}: #{e.class} - #{e.message}")
+    snaptrade_account.update!(activities_fetch_pending: false)
+    snaptrade_account.snaptrade_item.broadcast_sync_complete
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error("SnaptradeActivitiesFetchJob - Record invalid for account #{snaptrade_account.id}: #{e.message}")
+    snaptrade_account.update!(activities_fetch_pending: false)
+    snaptrade_account.snaptrade_item.broadcast_sync_complete
   rescue => e
-    Rails.logger.error("SnaptradeActivitiesFetchJob - Error for account #{snaptrade_account.id}: #{e.message}")
+    Rails.logger.error("SnaptradeActivitiesFetchJob - Unexpected error for account #{snaptrade_account.id}: #{e.class} - #{e.message}")
     Rails.logger.error(e.backtrace.first(5).join("\n")) if e.backtrace
+    Sentry.capture_exception(e, extra: { account_id: snaptrade_account.id, job: "SnaptradeActivitiesFetchJob" })
     # Clear pending flag on error to avoid stuck syncing state
-    snaptrade_account.update!(activities_fetch_pending: false) rescue nil
-    snaptrade_account.snaptrade_item.broadcast_sync_complete rescue nil
+    begin
+      snaptrade_account.update!(activities_fetch_pending: false)
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error("SnaptradeActivitiesFetchJob - Failed to clear pending flag: #{e.message}")
+    end
+    begin
+      snaptrade_account.snaptrade_item.broadcast_sync_complete
+    rescue => e
+      Rails.logger.warn("SnaptradeActivitiesFetchJob - Failed to broadcast sync complete: #{e.message}")
+    end
   end
 
   private
@@ -172,10 +189,16 @@ class SnaptradeActivitiesFetchJob < ApplicationJob
       Rails.logger.info(
         "SnaptradeActivitiesFetchJob - Processed and broadcast activities for account #{snaptrade_account.id}"
       )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error(
+        "SnaptradeActivitiesFetchJob - Failed to process activities for account #{snaptrade_account.id}: #{e.class} - #{e.message}"
+      )
+      Sentry.capture_exception(e, extra: { account_id: snaptrade_account.id, action: "process_activities" })
     rescue => e
       Rails.logger.error(
-        "SnaptradeActivitiesFetchJob - Failed to process activities for account #{snaptrade_account.id}: #{e.message}"
+        "SnaptradeActivitiesFetchJob - Failed to process activities for account #{snaptrade_account.id}: #{e.class} - #{e.message}"
       )
+      Sentry.capture_exception(e, extra: { account_id: snaptrade_account.id, action: "process_activities" })
     end
 
     def update_sync_stats(snaptrade_account, result)
@@ -198,7 +221,12 @@ class SnaptradeActivitiesFetchJob < ApplicationJob
       Rails.logger.info(
         "SnaptradeActivitiesFetchJob - Updated sync stats: trades=#{result[:trades]}, transactions=#{result[:transactions]}"
       )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error("SnaptradeActivitiesFetchJob - Failed to update sync stats: #{e.class} - #{e.message}")
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.warn("SnaptradeActivitiesFetchJob - Sync not found when updating stats: #{e.message}")
     rescue => e
-      Rails.logger.error("SnaptradeActivitiesFetchJob - Failed to update sync stats: #{e.message}")
+      Rails.logger.error("SnaptradeActivitiesFetchJob - Failed to update sync stats: #{e.class} - #{e.message}")
+      Sentry.capture_exception(e, extra: { account_id: snaptrade_account.id, action: "update_sync_stats" })
     end
 end

@@ -344,7 +344,12 @@ class Entry < ApplicationRecord
   def locked_fields_with_timestamps
     combined = (locked_attributes || {}).merge(entryable&.locked_attributes || {})
     combined.transform_values do |timestamp|
-      Time.zone.parse(timestamp.to_s) rescue timestamp
+      begin
+        Time.zone.parse(timestamp.to_s)
+      rescue ArgumentError => e
+        Rails.logger.error("Invalid timestamp format in locked_fields_with_timestamps: #{timestamp.inspect}, entry_id: #{id}")
+        timestamp
+      end
     end
   end
 

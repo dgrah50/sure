@@ -2,6 +2,35 @@ import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 import { sankey } from "d3-sankey";
 
+/**
+ * SankeyNode - A node in the Sankey diagram
+ * @typedef {Object} SankeyNode
+ * @property {number} index - Unique node index
+ * @property {number} x0 - Left x-coordinate
+ * @property {number} x1 - Right x-coordinate
+ * @property {number} y0 - Top y-coordinate
+ * @property {number} y1 - Bottom y-coordinate
+ * @property {number} value - Total flow value through the node
+ * @property {number} depth - Column/level in the diagram
+ * @property {string} id - Node identifier
+ * @property {string} name - Display name
+ * @property {string} color - CSS color value
+ * @property {Array<SankeyLink>} sourceLinks - Links originating from this node
+ * @property {Array<SankeyLink>} targetLinks - Links ending at this node
+ */
+
+/**
+ * SankeyLink - A link connecting two nodes in the Sankey diagram
+ * @typedef {Object} SankeyLink
+ * @property {SankeyNode} source - Source node reference
+ * @property {SankeyNode} target - Target node reference
+ * @property {number} value - Flow value
+ * @property {number} width - Visual width of the link path
+ * @property {number} y0 - Top y-coordinate at source
+ * @property {number} y1 - Top y-coordinate at target
+ * @property {number} percentage - Percentage of flow (for display)
+ */
+
 // Connects to data-controller="sankey-chart"
 export default class extends Controller {
   static values = {
@@ -79,6 +108,17 @@ export default class extends Controller {
     return Math.max(this.constructor.MIN_NODE_PADDING, dynamicPadding);
   }
 
+  /**
+   * Generates the Sankey diagram data structure using d3-sankey
+   * Transforms raw node/link data into positioned Sankey layout
+   * @param {Array<{id: string, name: string, color: string}>} nodes - Raw node data
+   * @param {Array<{source: string|number, target: string|number, value: number, percentage: number}>} links - Raw link data
+   * @param {number} width - Container width in pixels
+   * @param {number} height - Container height in pixels
+   * @param {number} nodePadding - Padding between nodes in pixels
+   * @returns {{nodes: Array<SankeyNode>, links: Array<SankeyLink>}} Positioned Sankey nodes and links
+   * @private
+   */
   #generateSankeyData(nodes, links, width, height, nodePadding) {
     const margin = this.constructor.EXTENT_MARGIN;
     const sankeyGenerator = sankey()
@@ -397,6 +437,12 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Formats a numeric value as a currency string with symbol
+   * @param {number} value - Numeric value to format
+   * @returns {string} Formatted currency string with currency symbol
+   * @private
+   */
   #formatCurrency(value) {
     const formatted = Number.parseFloat(value).toLocaleString(undefined, {
       minimumFractionDigits: 2,
