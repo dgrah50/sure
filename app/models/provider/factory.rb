@@ -28,9 +28,7 @@ class Provider::Factory
     # @param account_provider [AccountProvider] The account provider record
     # @return [Provider::Base] An adapter instance
     def from_account_provider(account_provider)
-      return nil if account_provider.nil?
-
-      create_adapter(account_provider.provider, account: account_provider.account)
+      Provider::AccountAdapterFactory.create(account_provider)
     end
 
     # Get list of registered provider types
