@@ -13,20 +13,42 @@ class Holding < ApplicationRecord
 
   COST_BASIS_SOURCES = %w[manual calculated provider].freeze
 
+  # Confidence levels for data quality tracking
+  # - live: Real-time data from provider (highest trust)
+  # - manual_recent: User-entered data within last 30 days
+  # - manual_stale: User-entered data older than 30 days
+  # - computed: Derived from trades/calculations
+  # - unknown: Default, no confidence assessment (lowest trust)
+  enum :confidence, {
+    unknown: 0,
+    live: 1,
+    manual_recent: 2,
+    manual_stale: 3,
+    computed: 4
+  }, prefix: true, default: :unknown
+
   belongs_to :account
   belongs_to :security
   belongs_to :account_provider, optional: true
   belongs_to :provider_security, class_name: "Security", optional: true
+  has_one :instrument_mapping, dependent: :destroy
 
   validates :qty, :currency, :date, :price, :amount, presence: true
   validates :qty, :price, :amount, numericality: { greater_than_or_equal_to: 0 }
   validates :external_id, uniqueness: { scope: :account_id }, allow_blank: true
   validates :cost_basis_source, inclusion: { in: COST_BASIS_SOURCES }, allow_nil: true
+  validates :source_type, length: { maximum: 255 }, allow_nil: true
 
   scope :chronological, -> { order(:date) }
   scope :for, ->(security) { where(security_id: security).order(:date) }
   scope :with_locked_cost_basis, -> { where(cost_basis_locked: true) }
   scope :with_unlocked_cost_basis, -> { where(cost_basis_locked: false) }
+  scope :with_confidence, ->(level) { where(confidence: confidences[level]) }
+  scope :live, -> { where(confidence: confidences[:live]) }
+  scope :manual_recent, -> { where(confidence: confidences[:manual_recent]) }
+  scope :manual_stale, -> { where(confidence: confidences[:manual_stale]) }
+  scope :computed, -> { where(confidence: confidences[:computed]) }
+  scope :unknown_confidence, -> { where(confidence: confidences[:unknown]) }
 
   delegate :ticker, to: :security
 
@@ -253,6 +275,21 @@ class Holding < ApplicationRecord
     return nil unless cost_basis_source.present?
 
     I18n.t("holdings.cost_basis_sources.#{cost_basis_source}")
+  end
+
+  # Check if the holding has been verified recently (within last 30 days)
+  def recently_verified?
+    last_verified_at.present? && last_verified_at > 30.days.ago
+  end
+
+  # Mark the holding as verified now
+  def mark_verified!
+    update!(last_verified_at: Time.current)
+  end
+
+  # Human-readable confidence label for UI display
+  def confidence_label
+    I18n.t("holdings.confidence_levels.#{confidence}")
   end
 
   private

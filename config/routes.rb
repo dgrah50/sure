@@ -173,7 +173,6 @@ Rails.application.routes.draw do
   resources :users, only: %i[update destroy] do
     delete :reset, on: :member
     delete :reset_with_sample_data, on: :member
-    patch :rule_prompt_settings, on: :member
     get :resend_confirmation_email, on: :member
   end
 
@@ -216,58 +215,11 @@ Rails.application.routes.draw do
     delete :destroy_all, on: :collection
   end
 
-  namespace :category do
-    resource :dropdown, only: :show
-  end
-
-  resources :categories, except: :show do
-    resources :deletions, only: %i[new create], module: :category
-
-    post :bootstrap, on: :collection
-    delete :destroy_all, on: :collection
-  end
-
   resources :reports, only: %i[index] do
     patch :update_preferences, on: :collection
     get :export_transactions, on: :collection
     get :google_sheets_instructions, on: :collection
     get :print, on: :collection
-  end
-
-  resources :budgets, only: %i[index show edit update], param: :month_year do
-    post :copy_previous, on: :member
-    get :picker, on: :collection
-
-    resources :budget_categories, only: %i[index show update]
-  end
-
-  resources :family_merchants, only: %i[index new create edit update destroy] do
-    collection do
-      get :merge
-      post :perform_merge
-      post :enhance
-    end
-  end
-
-  get :exchange_rate, to: "exchange_rates#show"
-
-  resources :transfers, only: %i[new create destroy show update]
-
-  resources :imports, only: %i[index new show create update destroy] do
-    member do
-      post :publish
-      put :revert
-      put :apply_template
-    end
-
-    resource :upload, only: %i[show update], module: :import
-    resource :configuration, only: %i[show update], module: :import
-    resource :clean, only: :show, module: :import
-    resource :confirm, only: :show, module: :import
-    resource :qif_category_selection, only: %i[show update], module: :import
-
-    resources :rows, only: %i[show update], module: :import
-    resources :mappings, only: :update, module: :import
   end
 
   resources :holdings, only: %i[index new show update destroy] do
@@ -288,20 +240,8 @@ Rails.application.routes.draw do
     post :confirm_update, on: :member
   end
 
-  namespace :transactions do
-    resource :bulk_deletion, only: :create
-    resource :bulk_update, only: %i[new create]
-    resource :categorize, only: %i[show create] do
-      patch :assign_entry, on: :collection
-      get :preview_rule, on: :collection
-    end
-  end
-
   resources :transactions, only: %i[index new create show update destroy] do
     resource :split, only: %i[new create edit update destroy]
-    resource :transfer_match, only: %i[new create]
-    resource :pending_duplicate_merges, only: %i[new create]
-    resource :category, only: :update, controller: :transaction_categories
     resources :attachments, only: %i[show create destroy], controller: :transaction_attachments
 
     collection do
@@ -312,22 +252,9 @@ Rails.application.routes.draw do
     member do
       get :convert_to_trade
       post :create_trade_from_transaction
-      post :mark_as_recurring
       post :merge_duplicate
       post :dismiss_duplicate
       post :unlock
-    end
-  end
-
-  resources :recurring_transactions, only: %i[index destroy] do
-    collection do
-      match :identify, via: [ :get, :post ]
-      match :cleanup, via: [ :get, :post ]
-      patch :update_settings
-    end
-
-    member do
-      match :toggle_status, via: [ :get, :post ]
     end
   end
 
@@ -338,20 +265,6 @@ Rails.application.routes.draw do
       route_for entry.entryable_name.pluralize, options
     else
       route_for entry.entryable_name, entry, options
-    end
-  end
-
-  resources :rules, except: :show do
-    member do
-      get :confirm
-      post :apply
-    end
-
-    collection do
-      delete :destroy_all
-      get :confirm_all
-      post :apply_all
-      post :clear_ai_cache
     end
   end
 
@@ -420,15 +333,12 @@ Rails.application.routes.draw do
 
       # Production API endpoints
       resources :accounts, only: [ :index, :show ]
-      resources :categories, only: [ :index, :show ]
-      resources :merchants, only: %i[index show]
       resources :tags, only: %i[index show create update destroy]
 
       resources :transactions, only: [ :index, :show, :create, :update, :destroy ]
       resources :trades, only: [ :index, :show, :create, :update, :destroy ]
       resources :holdings, only: [ :index, :show ]
       resources :valuations, only: [ :create, :update, :show ]
-      resources :imports, only: [ :index, :show, :create ]
       resource :usage, only: [ :show ], controller: :usage
       resource :balance_sheet, only: [ :show ], controller: :balance_sheet
       post :sync, to: "sync#create"
@@ -452,8 +362,6 @@ Rails.application.routes.draw do
       end
     end
   end
-
-
 
   resources :currencies, only: %i[show]
 
@@ -527,8 +435,6 @@ Rails.application.routes.draw do
   # Render dynamic PWA files from app/views/pwa/*
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-
-  get "imports/:import_id/upload/sample_csv", to: "import/uploads#sample_csv", as: :import_upload_sample_csv
 
   privacy_url = ENV["LEGAL_PRIVACY_URL"].presence
   terms_url = ENV["LEGAL_TERMS_URL"].presence

@@ -4,10 +4,8 @@ import '../models/account.dart';
 import '../models/transaction.dart';
 import '../models/offline_transaction.dart';
 import '../providers/auth_provider.dart';
-import '../providers/categories_provider.dart';
 import '../providers/transactions_provider.dart';
 import '../screens/transaction_form_screen.dart';
-import '../widgets/category_filter.dart';
 import '../widgets/sync_status_badge.dart';
 import '../services/log_service.dart';
 
@@ -26,13 +24,11 @@ class TransactionsListScreen extends StatefulWidget {
 class _TransactionsListScreenState extends State<TransactionsListScreen> {
   bool _isSelectionMode = false;
   final Set<String> _selectedTransactions = {};
-  Set<String> _selectedCategoryIds = {};
 
   @override
   void initState() {
     super.initState();
     _loadTransactions();
-    _loadCategories();
   }
 
   // Parse and display amount information
@@ -82,7 +78,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
         'icon': isPositive ? Icons.arrow_upward : Icons.arrow_downward,
         'prefix': isPositive ? '' : '-',
       };
-    } catch (e) {
+      } catch (e) {
       // Fallback if parsing fails - log and return neutral state
       LogService.instance.error('TransactionsListScreen', 'Failed to parse amount "$amount": $e');
       return {
@@ -93,31 +89,6 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
         'prefix': '',
       };
     }
-  }
-
-  Future<void> _loadCategories() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final categoriesProvider = Provider.of<CategoriesProvider>(context, listen: false);
-    final accessToken = await authProvider.getValidAccessToken();
-    if (accessToken != null) {
-      await categoriesProvider.fetchCategories(accessToken: accessToken);
-    }
-  }
-
-  String? _getCategoryDisplayName(String? categoryId, String? fallbackName) {
-    if (categoryId == null) return fallbackName;
-    final categoriesProvider = Provider.of<CategoriesProvider>(context);
-    for (final cat in categoriesProvider.categories) {
-      if (cat.id == categoryId) return cat.displayName;
-    }
-    return fallbackName;
-  }
-
-  List<OfflineTransaction> _getFilteredTransactions(List<OfflineTransaction> transactions) {
-    if (_selectedCategoryIds.isEmpty) return transactions;
-    return transactions.where((t) =>
-      t.categoryId != null && _selectedCategoryIds.contains(t.categoryId)
-    ).toList();
   }
 
   Future<void> _loadTransactions() async {
@@ -439,52 +410,13 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             );
           }
 
-          final transactions = _getFilteredTransactions(allTransactions);
-
           return RefreshIndicator(
             onRefresh: _loadTransactions,
-            child: Column(
-              children: [
-                Consumer<CategoriesProvider>(
-                  builder: (context, categoriesProvider, _) {
-                    if (categoriesProvider.isLoading || categoriesProvider.categories.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 4),
-                      child: CategoryFilter(
-                        availableCategories: categoriesProvider.categories,
-                        selectedCategoryIds: _selectedCategoryIds,
-                        onSelectionChanged: (categoryIds) {
-                          setState(() {
-                            _selectedCategoryIds = categoryIds;
-                          });
-                        },
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: transactions.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.4,
-                            child: Center(
-                              child: Text(
-                                'No transactions match this category',
-                                style: TextStyle(color: colorScheme.onSurfaceVariant),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: transactions.length,
+              itemCount: allTransactions.length,
               itemBuilder: (context, index) {
-                final transaction = transactions[index];
+                final transaction = allTransactions[index];
                 final isSelected = transaction.id != null &&
                     _selectedTransactions.contains(transaction.id);
                 final isPending = transaction.syncStatus == SyncStatus.pending;
@@ -564,30 +496,6 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      if (transaction.categoryName != null) ...[
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          flex: 0,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color: colorScheme.primary.withValues(alpha: 0.3),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              _getCategoryDisplayName(transaction.categoryId, transaction.categoryName) ?? '',
-                                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                                    color: colorScheme.onPrimaryContainer,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
                                     ],
                                   ),
                                   const SizedBox(height: 4),
@@ -665,9 +573,6 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                   ),
                 );
               },
-            ),
-                ),
-              ],
             ),
           );
         },

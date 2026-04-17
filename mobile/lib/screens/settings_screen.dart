@@ -3,7 +3,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
-import '../providers/categories_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/offline_storage_service.dart';
 import '../services/log_service.dart';
@@ -126,9 +125,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         log.info('Settings', 'Clearing all local data...');
         await offlineStorage.clearAllData();
-        if (context.mounted) {
-          Provider.of<CategoriesProvider>(context, listen: false).clear();
-        }
         log.info('Settings', 'Local data cleared successfully');
 
         if (context.mounted) {
@@ -210,9 +206,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (result['success'] == true) {
         await OfflineStorageService().clearAllData();
-        if (context.mounted) {
-          Provider.of<CategoriesProvider>(context, listen: false).clear();
-        }
 
         if (!context.mounted) return;
 
