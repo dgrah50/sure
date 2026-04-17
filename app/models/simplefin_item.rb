@@ -3,6 +3,12 @@ class SimplefinItem < ApplicationRecord
   include SimplefinItem::Unlinking
 
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+  enum :sync_health_status, { healthy: "healthy", warning: "warning", critical: "critical" }, prefix: true
+
+  # Health thresholds
+  HEALTHY_SYNC_THRESHOLD = 24.hours
+  WARNING_SYNC_THRESHOLD = 3.days
+  CRITICAL_SYNC_THRESHOLD = 7.days
 
   # Virtual attribute for the setup token form field
   attr_accessor :setup_token
@@ -397,6 +403,80 @@ class SimplefinItem < ApplicationRecord
     end
 
     { stale: false }
+  end
+
+  # Calculate sync health status based on last successful sync timestamp
+  # Returns :healthy, :warning, or :critical
+  def calculate_sync_health_status
+    sync_time = last_successful_sync_at || last_synced_at
+    return :critical unless sync_time.present?
+
+    hours_since_sync = (Time.current - sync_time) / 1.hour
+
+    if hours_since_sync <= 24
+      :healthy
+    elsif hours_since_sync <= 72
+      :warning
+    else
+      :critical
+    end
+  end
+
+  # Update and persist the sync health status
+  def update_sync_health_status!
+    new_status = calculate_sync_health_status
+    update_column(:sync_health_status, new_status)
+    new_status
+  end
+
+  # Check if the sync is healthy (within 24 hours)
+  def sync_healthy?
+    sync_time = last_successful_sync_at || last_synced_at
+    return false unless sync_time.present?
+
+    sync_time >= HEALTHY_SYNC_THRESHOLD.ago
+  end
+
+  # Get a human-readable summary of sync health
+  def sync_health_summary
+    sync_time = last_successful_sync_at || last_synced_at
+    return "Never synced" unless sync_time.present?
+
+    hours_since = ((Time.current - sync_time) / 1.hour).round
+
+    if sync_healthy?
+      "Last synced #{hours_since} #{'hour'.pluralize(hours_since)} ago"
+    elsif hours_since <= 72
+      "Last synced #{hours_since} hours ago - may need attention"
+    else
+      days_since = (hours_since / 24).round
+      "Last synced #{days_since} #{'day'.pluralize(days_since)} ago - connection may need update"
+    end
+  end
+
+  # Categorize SimpleFin errors
+  def self.error_category(error_message)
+    return :unknown if error_message.blank?
+
+    msg_lower = error_message.downcase
+
+    if msg_lower.match?(/authentication|unauthorized|401|403|forbidden|invalid.*token|expired|credential|login/)
+      :auth
+    elsif msg_lower.match?(/rate.*limit|too.*many.*requests|429|throttle|quota|make fewer requests|24 hours/)
+      :rate_limit
+    elsif msg_lower.match?(/institution.*down|institution.*error|institution.*not.*responding|bank.*down/)
+      :institution_unavailable
+    elsif msg_lower.match?(/timeout|connection.*error|network.*error|unreachable|refused/)
+      :network
+    elsif msg_lower.match?(/account.*not.*found|item.*not.*found|404/)
+      :not_found
+    else
+      :unknown
+    end
+  end
+
+  def error_category(error_message = nil)
+    self.class.error_category(error_message || syncs.failed.first&.error)
   end
 
   # Check if the SimpleFin connection needs user attention

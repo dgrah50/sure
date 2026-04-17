@@ -8,18 +8,14 @@ class Account < ApplicationRecord
 
   belongs_to :family
   belongs_to :owner, class_name: "User", optional: true
-  belongs_to :import, optional: true
 
   has_many :account_shares, dependent: :destroy
-  has_many :shared_users, through: :account_shares, source: :user
-  has_many :import_mappings, as: :mappable, dependent: :destroy, class_name: "Import::Mapping"
   has_many :entries, dependent: :destroy
   has_many :transactions, through: :entries, source: :entryable, source_type: "Transaction"
   has_many :valuations, through: :entries, source: :entryable, source_type: "Valuation"
   has_many :trades, through: :entries, source: :entryable, source_type: "Trade"
   has_many :holdings, dependent: :destroy
   has_many :balances, dependent: :destroy
-  has_many :recurring_transactions, dependent: :destroy
 
   monetize :balance, :cash_balance
 

@@ -6,6 +6,9 @@ class Sync < ApplicationRecord
   # The max time that a sync will show in the UI (after 5 minutes)
   VISIBLE_FOR = 5.minutes
 
+  # Health check threshold - if no successful sync in this period, considered unhealthy
+  HEALTHY_SYNC_THRESHOLD = 24.hours
+
   include AASM
 
   Error = Class.new(StandardError)
@@ -18,8 +21,11 @@ class Sync < ApplicationRecord
   scope :ordered, -> { order(created_at: :desc) }
   scope :incomplete, -> { where("syncs.status IN (?)", %w[pending syncing]) }
   scope :visible, -> { incomplete.where("syncs.created_at > ?", VISIBLE_FOR.ago) }
+  scope :successful, -> { where(status: :completed) }
+  scope :recently_successful, -> { successful.where("completed_at > ?", HEALTHY_SYNC_THRESHOLD.ago) }
 
   after_commit :update_family_sync_timestamp
+  after_commit :update_last_successful_sync, if: :completed?
 
   serialize :sync_stats, coder: JSON
 
@@ -57,6 +63,79 @@ class Sync < ApplicationRecord
     def clean
       incomplete.where("syncs.created_at < ?", STALE_AFTER.ago).find_each(&:mark_stale!)
     end
+  end
+
+  # Calculate the duration of the sync in seconds
+  def duration_seconds
+    return nil unless end_time.present? && start_time.present?
+
+    (end_time - start_time).to_f
+  end
+
+  # Get the start time for duration calculation
+  def start_time
+    syncing_at || pending_at
+  end
+
+  # Get the end time for duration calculation
+  def end_time
+    completed_at || failed_at || (stale? ? updated_at : nil)
+  end
+
+  # Human-readable status message
+  def humanized_status
+    case status
+    when "pending"
+      status_text.presence || I18n.t("syncs.status.pending", default: "Waiting to start...")
+    when "syncing"
+      status_text.presence || I18n.t("syncs.status.syncing", default: "Syncing...")
+    when "completed"
+      I18n.t("syncs.status.completed", default: "Completed successfully")
+    when "failed"
+      I18n.t("syncs.status.failed", default: "Failed: %{error}", error: error)
+    when "stale"
+      I18n.t("syncs.status.stale", default: "Sync timed out")
+    else
+      status.to_s.humanize
+    end
+  end
+
+  # Categorize errors into common types
+  def error_category
+    return nil if error.blank?
+
+    error_lower = error.downcase
+
+    if error_lower.match?(/authentication|unauthorized|401|403|forbidden|invalid.*token|expired.*token|access_token|credential/)
+      :auth
+    elsif error_lower.match?(/rate.*limit|too.*many.*requests|429|throttle|quota/)
+      :rate_limit
+    elsif error_lower.match?(/timeout|connection|network|refused|dns|unreachable|503|502|504|500.*error|server.*error/)
+      :network
+    elsif error_lower.match?(/item.*not.*found|account.*not.*found|404/)
+      :not_found
+    else
+      :unknown
+    end
+  end
+
+  # Check if this sync represents a healthy state
+  # Returns true if the sync completed successfully and the syncable has synced recently
+  def healthy?
+    return false unless completed?
+
+    # Check if syncable has a recent successful sync
+    if syncable.respond_to?(:last_successful_sync_at)
+      syncable.last_successful_sync_at.present? && syncable.last_successful_sync_at >= HEALTHY_SYNC_THRESHOLD.ago
+    else
+      # Fallback: check this sync completed recently
+      completed_at.present? && completed_at >= HEALTHY_SYNC_THRESHOLD.ago
+    end
+  end
+
+  # Update the status text for user feedback
+  def update_status_text(text)
+    update(status_text: text) if text.present?
   end
 
   def perform
@@ -195,6 +274,16 @@ class Sync < ApplicationRecord
 
     def handle_completion_transition
       family.touch(:latest_sync_completed_at)
+      update_last_successful_sync_timestamp
+    end
+
+    def update_last_successful_sync
+      update_last_successful_sync_timestamp if completed?
+    end
+
+    def update_last_successful_sync_timestamp
+      update_columns(last_successful_sync_at: Time.current)
+      syncable.update_columns(last_successful_sync_at: Time.current) if syncable.respond_to?(:last_successful_sync_at)
     end
 
     def window_valid

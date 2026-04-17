@@ -3,6 +3,11 @@ class PlaidItem < ApplicationRecord
 
   enum :plaid_region, { us: "us", eu: "eu" }
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+  enum :sync_health_status, { healthy: "healthy", warning: "warning", critical: "critical" }, prefix: true
+
+  # Health thresholds
+  HEALTHY_SYNC_THRESHOLD = 24.hours
+  WARNING_SYNC_THRESHOLD = 3.days
 
   # Encrypt sensitive credentials and raw payloads if ActiveRecord encryption is configured
   if encryption_ready?
@@ -106,6 +111,77 @@ class PlaidItem < ApplicationRecord
     )
 
     save!
+  end
+
+  # Calculate sync health status based on last successful sync timestamp
+  # Returns :healthy, :warning, or :critical
+  def calculate_sync_health_status
+    return :critical unless last_successful_sync_at.present?
+
+    hours_since_sync = (Time.current - last_successful_sync_at) / 1.hour
+
+    if hours_since_sync <= 24
+      :healthy
+    elsif hours_since_sync <= 72
+      :warning
+    else
+      :critical
+    end
+  end
+
+  # Update and persist the sync health status
+  def update_sync_health_status!
+    new_status = calculate_sync_health_status
+    update_column(:sync_health_status, new_status)
+    new_status
+  end
+
+  # Check if the sync is healthy (within 24 hours)
+  def sync_healthy?
+    return false unless last_successful_sync_at.present?
+
+    last_successful_sync_at >= HEALTHY_SYNC_THRESHOLD.ago
+  end
+
+  # Get a human-readable summary of sync health
+  def sync_health_summary
+    return "Never synced" unless last_successful_sync_at.present?
+
+    hours_since = ((Time.current - last_successful_sync_at) / 1.hour).round
+
+    if sync_healthy?
+      "Last synced #{hours_since} #{'hour'.pluralize(hours_since)} ago"
+    elsif hours_since <= 72
+      "Last synced #{hours_since} hours ago - may need attention"
+    else
+      days_since = (hours_since / 24).round
+      "Last synced #{days_since} #{'day'.pluralize(days_since)} ago - connection may need update"
+    end
+  end
+
+  # Categorize Plaid errors
+  def self.error_category(error_message)
+    return :unknown if error_message.blank?
+
+    msg_lower = error_message.downcase
+
+    if msg_lower.match?(/item_login_required|item_error|credentials|login|mfa|verification|authentication/)
+      :auth
+    elsif msg_lower.match?(/rate.*limit|too.*many.*requests|throttle/)
+      :rate_limit
+    elsif msg_lower.match?(/institution.*down|institution.*error|institution.*not.*responding/)
+      :institution_unavailable
+    elsif msg_lower.match?(/timeout|connection.*error|network.*error|unreachable/)
+      :network
+    elsif msg_lower.match?(/item_not_found|item.*not.*found/)
+      :item_not_found
+    else
+      :unknown
+    end
+  end
+
+  def error_category(error_message = nil)
+    self.class.error_category(error_message || syncs.failed.first&.error)
   end
 
   def supports_product?(product)

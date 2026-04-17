@@ -1,5 +1,5 @@
 class Family < ApplicationRecord
-  include Syncable, AutoTransferMatchable, Subscribeable, VectorSearchable
+  include Syncable, Subscribeable, VectorSearchable
   include PlaidConnectable, SimplefinConnectable, LunchflowConnectable, EnableBankingConnectable
   include CoinbaseConnectable, BinanceConnectable, CoinstatsConnectable, SnaptradeConnectable, MercuryConnectable
   include IndexaCapitalConnectable
@@ -25,25 +25,19 @@ class Family < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :accounts, dependent: :destroy
   has_many :invitations, dependent: :destroy
-
-  has_many :imports, dependent: :destroy
   has_many :family_exports, dependent: :destroy
 
   has_many :entries, through: :accounts
   has_many :transactions, through: :accounts
-  has_many :rules, dependent: :destroy
   has_many :trades, through: :accounts
   has_many :holdings, through: :accounts
 
   has_many :tags, dependent: :destroy
-  has_many :categories, dependent: :destroy
-  has_many :merchants, dependent: :destroy, class_name: "FamilyMerchant"
-
-  has_many :budgets, dependent: :destroy
-  has_many :budget_categories, through: :budgets
 
   has_many :llm_usages, dependent: :destroy
-  has_many :recurring_transactions, dependent: :destroy
+
+  has_many :data_quality_checks, dependent: :destroy
+  has_one :data_quality_summary, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :date_format, inclusion: { in: DATE_FORMATS.map(&:last) }
@@ -56,6 +50,10 @@ class Family < ApplicationRecord
 
   def primary_currency_code
     normalize_currency_code(currency) || "USD"
+  end
+
+  def single_currency?
+    enabled_currency_codes.size <= 1
   end
 
   def custom_enabled_currencies?
@@ -118,133 +116,8 @@ class Family < ApplicationRecord
     Period.custom(start_date: start_date, end_date: end_date)
   end
 
-  def assigned_merchants
-    merchant_ids = transactions.where.not(merchant_id: nil).pluck(:merchant_id).uniq
-    Merchant.where(id: merchant_ids)
-  end
-
-  def available_merchants
-    assigned_ids = transactions.where.not(merchant_id: nil).pluck(:merchant_id).uniq
-    recently_unlinked_ids = FamilyMerchantAssociation
-      .where(family: self)
-      .recently_unlinked
-      .pluck(:merchant_id)
-    family_merchant_ids = merchants.pluck(:id)
-    Merchant.where(id: (assigned_ids + recently_unlinked_ids + family_merchant_ids).uniq)
-  end
-
-  def assigned_merchants_for(user)
-    merchant_ids = Transaction.joins(:entry)
-      .where(entries: { account_id: accounts.accessible_by(user).select(:id) })
-      .where.not(merchant_id: nil)
-      .distinct
-      .pluck(:merchant_id)
-    Merchant.where(id: merchant_ids)
-  end
-
-  def available_merchants_for(user)
-    assigned_ids = Transaction.joins(:entry)
-      .where(entries: { account_id: accounts.accessible_by(user).select(:id) })
-      .where.not(merchant_id: nil)
-      .distinct
-      .pluck(:merchant_id)
-    recently_unlinked_ids = FamilyMerchantAssociation
-      .where(family: self)
-      .recently_unlinked
-      .pluck(:merchant_id)
-    family_merchant_ids = merchants.pluck(:id)
-    Merchant.where(id: (assigned_ids + recently_unlinked_ids + family_merchant_ids).uniq)
-  end
-
-  def auto_categorize_transactions_later(transactions, rule_run_id: nil)
-    AutoCategorizeJob.perform_later(self, transaction_ids: transactions.pluck(:id), rule_run_id: rule_run_id)
-  end
-
-  def auto_categorize_transactions(transaction_ids)
-    AutoCategorizer.new(self, transaction_ids: transaction_ids).auto_categorize
-  end
-
-  def auto_detect_transaction_merchants_later(transactions, rule_run_id: nil)
-    AutoDetectMerchantsJob.perform_later(self, transaction_ids: transactions.pluck(:id), rule_run_id: rule_run_id)
-  end
-
-  def auto_detect_transaction_merchants(transaction_ids)
-    AutoMerchantDetector.new(self, transaction_ids: transaction_ids).auto_detect
-  end
-
   def balance_sheet(user: Current.user)
     BalanceSheet.new(self, user: user)
-  end
-
-  def income_statement(user: Current.user)
-    IncomeStatement.new(self, user: user)
-  end
-
-  # Returns the Investment Contributions category for this family, creating it if it doesn't exist.
-  # This is used for auto-categorizing transfers to investment accounts.
-  # Always uses the family's locale to ensure consistent category naming across all users.
-  def investment_contributions_category
-    # Find ALL legacy categories (created under old request-locale behavior)
-    legacy = categories.where(name: Category.all_investment_contributions_names).order(:created_at).to_a
-
-    if legacy.any?
-      keeper = legacy.first
-      duplicates = legacy[1..]
-
-      # Reassign transactions and subcategories from duplicates to keeper
-      if duplicates.any?
-        duplicate_ids = duplicates.map(&:id)
-        categories.where(parent_id: duplicate_ids).update_all(parent_id: keeper.id)
-        Transaction.where(category_id: duplicate_ids).update_all(category_id: keeper.id)
-        BudgetCategory.where(category_id: duplicate_ids).update_all(category_id: keeper.id)
-        categories.where(id: duplicate_ids).delete_all
-      end
-
-      # Rename keeper to family's locale name if needed
-      I18n.with_locale(locale) do
-        correct_name = Category.investment_contributions_name
-        keeper.update!(name: correct_name) unless keeper.name == correct_name
-      end
-      return keeper
-    end
-
-    # Create new category using family's locale
-    I18n.with_locale(locale) do
-      categories.find_or_create_by!(name: Category.investment_contributions_name) do |cat|
-        cat.color = "#0d9488"
-        cat.lucide_icon = "trending-up"
-      end
-    end
-  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
-    # Handle race condition: another process created the category
-    I18n.with_locale(locale) do
-      categories.find_by!(name: Category.investment_contributions_name)
-    end
-  end
-
-  # Returns account IDs for tax-advantaged accounts (401k, IRA, HSA, etc.)
-  # Used to exclude these accounts from budget/cashflow calculations.
-  # Tax-advantaged accounts are retirement savings, not daily expenses.
-  def tax_advantaged_account_ids
-    @tax_advantaged_account_ids ||= begin
-      # Investment accounts derive tax_treatment from subtype
-      tax_advantaged_subtypes = Investment::SUBTYPES.select do |_, meta|
-        meta[:tax_treatment].in?(%i[tax_deferred tax_exempt tax_advantaged])
-      end.keys
-
-      investment_ids = accounts
-        .joins("INNER JOIN investments ON investments.id = accounts.accountable_id AND accounts.accountable_type = 'Investment'")
-        .where(investments: { subtype: tax_advantaged_subtypes })
-        .pluck(:id)
-
-      # Crypto accounts have an explicit tax_treatment column
-      crypto_ids = accounts
-        .joins("INNER JOIN cryptos ON cryptos.id = accounts.accountable_id AND accounts.accountable_type = 'Crypto'")
-        .where(cryptos: { tax_treatment: %w[tax_deferred tax_exempt] })
-        .pluck(:id)
-
-      investment_ids + crypto_ids
-    end
   end
 
   def investment_statement(user: Current.user)

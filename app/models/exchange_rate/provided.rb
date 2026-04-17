@@ -11,7 +11,15 @@ module ExchangeRate::Provided
     # Maximum number of days to look back for a cached rate before calling the provider.
     NEAREST_RATE_LOOKBACK_DAYS = 5
 
+    # Fixed rate value for same-currency conversions
+    FIXED_RATE_VALUE = 1.0
+
     def find_or_fetch_rate(from:, to:, date: Date.current, cache: true)
+      # Same currency has a fixed rate of 1.0, no need for DB lookup or provider call
+      if from == to
+        return FixedRate.new(from: from, to: to, date: date, rate: FIXED_RATE_VALUE)
+      end
+
       rate = find_by(from_currency: from, to_currency: to, date: date)
       return rate if rate.present?
 
@@ -106,5 +114,26 @@ module ExchangeRate::Provided
         Rails.cache.delete(lock_key) if Rails.cache.read(lock_key) == lock_token
       end
     end
+  end
+
+  # Simple value object representing a fixed exchange rate (same currency conversion)
+  # Behaves like an ExchangeRate record but is not persisted to the database
+  class FixedRate
+    attr_reader :from_currency, :to_currency, :date, :rate
+
+    def initialize(from:, to:, date:, rate:)
+      @from_currency = from
+      @to_currency = to
+      @date = date
+      @rate = rate
+    end
+
+    def fixed_rate?
+      true
+    end
+
+    # Convenience accessor aliases to match ExchangeRate attribute names
+    alias_method :from, :from_currency
+    alias_method :to, :to_currency
   end
 end
