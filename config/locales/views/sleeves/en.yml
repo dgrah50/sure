@@ -1,0 +1,44 @@
+---
+en:
+  sleeves:
+    can_only_modify_draft: Only draft policies can be modified.
+    created: Sleeve created successfully.
+    error: 'Error creating sleeve: %{error}'
+    updated: Sleeve updated successfully.
+    deleted: Sleeve deleted.
+    new:
+      title: New Sleeve
+      name_label: Name
+      name_placeholder: Enter sleeve name
+      description_label: Description
+      description_placeholder: Enter a description
+      target_percentage_label: Target Percentage
+      target_percentage_hint: Percentage of portfolio allocated to this sleeve
+      min_percentage_label: Minimum Percentage
+      max_percentage_label: Maximum Percentage
+      sort_order_label: Sort Order
+      sort_order_hint: Lower numbers appear first
+      color_label: Color
+      parent_sleeve_label: Parent Sleeve
+      no_parent: No parent (root sleeve)
+      submit: Create Sleeve
+      cancel: Cancel
+    edit:
+      title: Edit Sleeve
+      name_label: Name
+      name_placeholder: Enter sleeve name
+      description_label: Description
+      description_placeholder: Enter a description
+      target_percentage_label: Target Percentage
+      target_percentage_hint: Percentage of portfolio allocated to this sleeve
+      min_percentage_label: Minimum Percentage
+      max_percentage_label: Maximum Percentage
+      sort_order_label: Sort Order
+      sort_order_hint: Lower numbers appear first
+      color_label: Color
+      parent_sleeve_label: Parent Sleeve
+      no_parent: No parent (root sleeve)
+      submit: Update Sleeve
+      cancel: Cancel
+      delete: Delete
+      confirm_delete: Are you sure you want to delete this sleeve?

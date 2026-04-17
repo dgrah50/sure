@@ -1,0 +1,11 @@
+<%# locals: () %>
+
+<%= turbo_frame_tag "top_action_empty", class: "w-full" do %>
+  <div class="bg-container rounded-xl shadow-border-xs p-6 text-center">
+    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-surface flex items-center justify-center">
+      <%= icon "check-circle-2", size: "lg", class: "text-green-500" %>
+    </div>
+    <h3 class="font-medium text-primary text-sm"><%= t(".title") %></h3>
+    <p class="text-secondary text-xs mt-1"><%= t(".description") %></p>
+  </div>
+<% end %>

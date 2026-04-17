@@ -1,0 +1,62 @@
+<%= render "layouts/shared/page_header", title: t(".title"), subtitle: t(".subtitle") %>
+
+<div class="space-y-4">
+  <%# Filter/Search Bar %>
+  <div class="bg-container rounded-xl shadow-border-xs p-3">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <%= form_with url: decision_logs_path,
+            method: :get,
+            data: { turbo_frame: "decision_logs_list", turbo_action: "advance" },
+            class: "flex-1" do |f| %>
+        <div class="relative">
+          <%= icon "search", size: "sm", class: "absolute left-3 top-1/2 -translate-y-1/2 text-secondary" %>
+          <%= f.search_field :search,
+                value: params[:search],
+                placeholder: t(".search_placeholder"),
+                class: "w-full pl-10 pr-4 py-2 bg-container border border-secondary rounded-lg text-sm text-primary placeholder:text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none",
+                data: { action: "input->search#debounceSubmit" } %>
+        </div>
+      <% end %>
+
+      <%= form_with url: decision_logs_path,
+            method: :get,
+            data: { turbo_frame: "decision_logs_list", turbo_action: "advance" } do |f| %>
+        <%= f.select :decision_type,
+              options_for_select(
+                DecisionLog::DECISION_TYPES.map { |t| [t.humanize, t] },
+                params[:decision_type]
+              ),
+              { include_blank: t(".all_types") },
+              { class: "px-3 py-2 bg-container border border-secondary rounded-lg text-sm text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" } %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Decision Logs List %>
+  <%= turbo_frame_tag "decision_logs_list" do %>
+    <% if @decision_logs&.any? %>
+      <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+        <div class="divide-y divide-primary">
+          <%= render partial: "decision_log",
+                collection: @decision_logs,
+                as: :decision_log %>
+        </div>
+
+        <%# Pagination %>
+        <% if @pagy&.pages > 1 %>
+          <div class="p-4 border-t border-primary">
+            <%= render "shared/pagination", pagy: @pagy %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-container rounded-xl shadow-border-xs p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+          <%= icon "clipboard-list", size: "xl", class: "text-secondary" %>
+        </div>
+        <h3 class="font-medium text-primary text-lg"><%= t(".empty_title") %></h3>
+        <p class="text-secondary text-sm mt-2 max-w-sm mx-auto"><%= t(".empty_description") %></p>
+      </div>
+    <% end %>
+  <% end %>
+</div>

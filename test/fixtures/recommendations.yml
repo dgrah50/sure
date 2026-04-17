@@ -1,0 +1,50 @@
+pending_recommendation:
+  family: dylan_family
+  policy_version_id:
+  recommendation_type: rebalance
+  status: pending
+  title: "Portfolio Rebalance Recommended - Moderate"
+  description: "Portfolio drift of 12.5% detected across 3 sleeves."
+  details:
+    trades:
+      - action: buy
+        ticker: VTI
+        shares: 10
+        estimated_price: 225.50
+        estimated_amount: 2255.00
+        rationale: "Increase equity allocation"
+    total_amount: 2255.00
+    rationale: "Portfolio has drifted 12.5% from target allocations."
+    drift_metrics:
+      total_drift: 12.5
+      cash_percentage: 8.5
+      total_portfolio_value: 50000.00
+  approved_by_id:
+  executed_at:
+
+approved_recommendation:
+  family: dylan_family
+  policy_version_id:
+  recommendation_type: rebalance
+  status: approved
+  title: "Portfolio Rebalance Recommended - Minor"
+  description: "Small portfolio drift detected."
+  details:
+    trades: []
+    total_amount: 0
+    rationale: "Minor rebalance needed."
+  approved_by: family_admin
+  executed_at:
+
+executed_recommendation:
+  family: dylan_family
+  policy_version_id:
+  recommendation_type: rebalance
+  status: executed
+  title: "Portfolio Rebalance - Major"
+  description: "Major portfolio drift detected and rebalanced."
+  details:
+    trades: []
+    total_amount: 10000
+  approved_by: family_admin
+  executed_at: <%= 1.week.ago.to_s(:db) %>

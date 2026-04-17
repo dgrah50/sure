@@ -1,0 +1,29 @@
+---
+en:
+  decision_logs:
+    index:
+      title: "Decision Log"
+      subtitle: "Audit trail of all decisions and actions taken"
+      search_placeholder: "Search decisions..."
+      all_types: "All Types"
+      empty_title: "No decisions logged"
+      empty_description: "When you approve, reject, or dismiss recommendations, they will be recorded here."
+    decision_log:
+      reference: "%{type} #%{id}"
+      by_actor: "by %{name}"
+      show_metadata: "Show details"
+      view_details: "View full details"
+    show:
+      timestamp: "Decided on %{date}"
+      details: "Decision Details"
+      actor_label: "Actor"
+      reference_type_label: "Reference Type"
+      reference_id_label: "Reference ID"
+      linked_reference_label: "Linked Record"
+      rationale: "Rationale"
+      no_rationale: "No rationale provided"
+      metadata: "Additional Metadata"
+      audit: "Audit Information"
+      created_at_label: "Logged At"
+      log_id_label: "Log ID"
+      family_label: "Family"

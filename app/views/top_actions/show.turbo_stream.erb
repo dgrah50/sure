@@ -1,0 +1,12 @@
+<%# locals: (top_action:) %>
+
+<%= turbo_stream.replace dom_id(top_action) do %>
+  <% if top_action.completed? || top_action.dismissed? %>
+    <%# Show empty state if this was the last active action %>
+    <% if Current.family.top_actions.active.count == 0 %>
+      <%= render "top_actions/empty" %>
+    <% end %>
+  <% else %>
+    <%= render "top_actions/widget", top_action: top_action %>
+  <% end %>
+<% end %>

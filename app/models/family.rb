@@ -47,6 +47,12 @@ class Family < ApplicationRecord
 
   has_many :data_quality_checks, dependent: :destroy
   has_one :data_quality_summary, dependent: :destroy
+  has_many :data_health_statuses, dependent: :destroy
+  has_many :policy_versions, dependent: :destroy
+
+  has_many :recommendations, dependent: :destroy
+  has_many :top_actions, dependent: :destroy
+  has_many :decision_logs, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :date_format, inclusion: { in: DATE_FORMATS.map(&:last) }

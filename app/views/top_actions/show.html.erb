@@ -1,0 +1,105 @@
+<%= render DS::Dialog.new(frame: "drawer", responsive: true) do |dialog| %>
+  <% dialog.with_header(custom_header: true) do %>
+    <div class="relative">
+      <div class="absolute right-0 top-0 z-10">
+        <%= dialog.close_button %>
+      </div>
+
+      <div class="space-y-3 pr-10">
+        <div class="flex items-center gap-2">
+          <%= render "shared/badge", color: @top_action.priority >= 8 ? "error" : @top_action.priority >= 5 ? "warning" : nil do %>
+            <%= t(".priority_badge", priority: @top_action.priority) %>
+          <% end %>
+          <% if @top_action.confidence.present? %>
+            <%= render "shared/badge", color: @top_action.confidence >= 0.8 ? "success" : @top_action.confidence >= 0.6 ? "warning" : nil do %>
+              <%= t(".confidence", percent: number_to_percentage(@top_action.confidence * 100, precision: 0)) %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <h1 class="text-xl font-medium text-primary"><%= @top_action.title %></h1>
+
+        <% if @top_action.action_type.present? %>
+          <p class="text-secondary text-sm"><%= t(".action_type", type: @top_action.action_type.humanize) %></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% dialog.with_body do %>
+    <%# Action Details Section %>
+    <% dialog.with_section(title: t(".details"), open: true) do %>
+      <div class="space-y-4 pb-4">
+        <% if @top_action.amount_cents.present? %>
+          <div class="flex items-center justify-between py-2 border-b border-primary">
+            <span class="text-secondary text-sm"><%= t(".amount_label") %></span>
+            <span class="text-primary font-medium privacy-sensitive"><%= format_money(@top_action.amount_money) %></span>
+          </div>
+        <% end %>
+
+        <% if @top_action.account_name.present? %>
+          <div class="flex items-center justify-between py-2 border-b border-primary">
+            <span class="text-secondary text-sm"><%= t(".account_label") %></span>
+            <span class="text-primary font-medium"><%= @top_action.account_name %></span>
+          </div>
+        <% end %>
+
+        <% if @top_action.instrument.present? %>
+          <div class="flex items-center justify-between py-2 border-b border-primary">
+            <span class="text-secondary text-sm"><%= t(".instrument_label") %></span>
+            <span class="text-primary font-medium"><%= @top_action.instrument %></span>
+          </div>
+        <% end %>
+
+        <div class="flex items-center justify-between py-2">
+          <span class="text-secondary text-sm"><%= t(".created_label") %></span>
+          <span class="text-primary text-sm"><%= l(@top_action.created_at, format: :long) %></span>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Rationale Section %>
+    <% if @top_action.rationale.present? %>
+      <% dialog.with_section(title: t(".rationale"), open: true) do %>
+        <div class="pb-4 text-sm text-primary">
+          <%= simple_format(@top_action.rationale) %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Blockers Section %>
+    <% if @top_action.blockers.any? %>
+      <% dialog.with_section(title: t(".blockers"), open: true) do %>
+        <div class="space-y-2 pb-4">
+          <% @top_action.blockers.each do |blocker| %>
+            <%= render DS::Alert.new(
+              message: blocker["message"],
+              variant: :warning
+            ) %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Actions Section %>
+    <% dialog.with_section(title: t(".actions"), open: true) do %>
+      <div class="flex items-center gap-3 pb-4">
+        <%= button_to complete_top_action_path(@top_action),
+              method: :patch,
+              class: "flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors",
+              data: { turbo_confirm: t(".confirm_complete") } do %>
+          <%= icon "check", size: "sm" %>
+          <%= t(".complete") %>
+        <% end %>
+
+        <%= button_to dismiss_top_action_path(@top_action),
+              method: :patch,
+              class: "flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-secondary text-secondary text-sm font-medium hover:bg-subtle transition-colors",
+              data: { turbo_confirm: t(".confirm_dismiss") } do %>
+          <%= icon "x", size: "sm" %>
+          <%= t(".dismiss") %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,76 @@
+<%= render "layouts/shared/page_header", title: t(".title") %>
+
+<div class="space-y-6">
+  <%# Actions Header %>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <h2 class="text-lg font-medium text-primary"><%= t(".policies") %></h2>
+    </div>
+    <%= link_to new_policy_version_path, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors" do %>
+      <%= icon "plus", size: "sm" %>
+      <%= t(".new") %>
+    <% end %>
+  </div>
+
+  <%# Policy Versions List %>
+  <% if @policy_versions.any? %>
+    <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-surface border-b border-alpha-black-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".columns.name") %></th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".columns.status") %></th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".columns.effective_date") %></th>
+            <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".columns.actions") %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-alpha-black-50">
+          <% @policy_versions.each do |policy_version| %>
+            <tr class="hover:bg-surface/50">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center">
+                    <%= icon "shield", size: "sm", class: "text-secondary" %>
+                  </div>
+                  <div>
+                    <div class="font-medium text-primary"><%= policy_version.name %></div>
+                    <div class="text-xs text-secondary"><%= policy_version.description %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <% status_color = case policy_version.status
+                   when "active" then "success"
+                   when "draft" then "warning"
+                   else "secondary"
+                   end %>
+                <%= render "shared/badge", color: status_color do %>
+                  <%= t(".status_#{policy_version.status}") %>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-sm text-secondary">
+                <%= policy_version.effective_date&.strftime("%B %d, %Y") || "—" %>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= link_to policy_version_path(policy_version),
+                    class: "p-1.5 text-secondary hover:bg-surface rounded-md transition-colors",
+                    title: t(".view") do %>
+                  <%= icon "eye", size: "sm" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <%# Empty State %>
+    <div class="bg-container rounded-xl shadow-border-xs p-8 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+        <%= icon "shield", size: "xl", class: "text-secondary" %>
+      </div>
+      <h3 class="font-medium text-primary text-lg"><%= t(".empty") %></h3>
+      <p class="text-secondary text-sm mt-2 max-w-sm mx-auto"><%= t(".empty_description") %></p>
+    </div>
+  <% end %>
+</div>

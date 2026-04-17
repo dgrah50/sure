@@ -1,0 +1,38 @@
+---
+en:
+  guardrails:
+    create:
+      created: Guardrail created successfully.
+      error: 'Error creating guardrail: %{error}'
+    update:
+      updated: Guardrail updated successfully.
+    destroy:
+      deleted: Guardrail deleted.
+    new:
+      title: New Guardrail
+      name_label: Name
+      name_placeholder: Enter guardrail name
+      type_label: Type
+      severity_label: Severity
+      enabled_label: Enabled
+      configuration_title: Configuration
+      configuration_description: Configure the guardrail thresholds and limits.
+      threshold_label: Threshold
+      threshold_hint: Threshold value for this guardrail (e.g., percentage limit)
+      submit: Create Guardrail
+      cancel: Cancel
+    edit:
+      title: Edit Guardrail
+      name_label: Name
+      name_placeholder: Enter guardrail name
+      type_label: Type
+      severity_label: Severity
+      enabled_label: Enabled
+      configuration_title: Configuration
+      configuration_description: Configure the guardrail thresholds and limits.
+      threshold_label: Threshold
+      threshold_hint: Threshold value for this guardrail (e.g., percentage limit)
+      submit: Update Guardrail
+      cancel: Cancel
+      delete: Delete
+      confirm_delete: Are you sure you want to delete this guardrail?

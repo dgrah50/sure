@@ -1,0 +1,41 @@
+approval_log:
+  family: dylan_family
+  actor: family_admin
+  decision_type: recommendation_approved
+  reference_type: Recommendation
+  reference_id: <%= ActiveRecord::FixtureSet.identify(:approved_recommendation) %>
+  rationale: "Reviewed and approved based on current market conditions."
+  metadata:
+    ip_address: "127.0.0.1"
+    user_agent: "Mozilla/5.0"
+
+rejection_log:
+  family: dylan_family
+  actor: family_admin
+  decision_type: recommendation_rejected
+  reference_type: Recommendation
+  reference_id: <%= ActiveRecord::FixtureSet.identify(:pending_recommendation) %>
+  rationale: "Not aligned with short-term goals."
+  metadata:
+    rejection_reason: "short_term_misalignment"
+
+dismissal_log:
+  family: dylan_family
+  actor: family_admin
+  decision_type: action_dismissed
+  reference_type: TopAction
+  reference_id: <%= ActiveRecord::FixtureSet.identify(:dismissed_action) %>
+  rationale: "Will address this next month."
+  metadata:
+    scheduled_for: <%= 1.month.from_now.to_s(:db) %>
+
+override_log:
+  family: dylan_family
+  actor: family_admin
+  decision_type: manual_override
+  reference_type: Recommendation
+  reference_id: <%= ActiveRecord::FixtureSet.identify(:executed_recommendation) %>
+  rationale: "Manual execution required for special circumstances."
+  metadata:
+    override_reason: "special_circumstances"
+    approved_by_admin: true

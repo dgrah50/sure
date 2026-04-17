@@ -1,0 +1,63 @@
+---
+en:
+  recommendations:
+    index:
+      title: "Recommendations"
+      subtitle: "Review and manage your financial recommendations"
+      today: "Today"
+      this_week: "This Week"
+      this_month: "This Month"
+      future: "Future Events"
+      completed_count:
+        one: "1 Completed"
+        other: "%{count} Completed"
+      empty_title: "No recommendations yet"
+      empty_description: "When the system generates recommendations based on your portfolio and goals, they will appear here."
+    recommendation:
+      created_at: "Created %{date}"
+      approve: "Approve"
+      reject: "Reject"
+      view_details: "View details"
+      confirm_approve: "Approve this recommendation?"
+      confirm_reject: "Reject this recommendation?"
+    timeline_section:
+      count:
+        one: "1 item"
+        other: "%{count} items"
+    show:
+      rationale: "Rationale"
+      trades: "Recommended Trades"
+      shares_at: "shares at %{price}"
+      preconditions: "Before-You-Trade Checklist"
+      confidence: "Confidence Breakdown"
+      invalidation: "Invalidation Conditions"
+      review_schedule: "Review Schedule"
+      next_review: "Next review scheduled for %{date}"
+      audit: "Audit Trail"
+      approved_by: "Approved by"
+      executed_at: "Executed at"
+      approve: "Approve"
+      reject: "Reject"
+      confirm_approve: "Are you sure you want to approve this recommendation?"
+      confirm_reject: "Are you sure you want to reject this recommendation?"
+    checklist:
+      description: "Ensure all preconditions are met before proceeding with this trade."
+      pass: "Pass"
+      fail: "Fail"
+      check: "Check"
+      warning: "Some preconditions are not met. Review carefully before proceeding."
+      data_quality:
+        title: "Data Quality Check"
+        description: "Verify all account data is up to date and accurate"
+      policy_compliance:
+        title: "Policy Compliance"
+        description: "Ensure trade aligns with investment policy"
+      account_restrictions:
+        title: "Account Restrictions"
+        description: "Verify no restrictions on the target account"
+      liquidity_floor:
+        title: "Liquidity Floor"
+        description: "Ensure sufficient liquidity remains after trade"
+      concentration:
+        title: "Concentration Check"
+        description: "Verify portfolio concentration limits"

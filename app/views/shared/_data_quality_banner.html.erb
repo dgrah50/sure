@@ -1,0 +1,135 @@
+<%# locals: (compact: false) %>
+
+<%
+  summary = Current.family.data_quality_summary
+  return unless summary
+
+  health_status = summary.health_status
+  return if health_status == "excellent" && compact
+%>
+
+<%
+  banner_classes = case health_status
+  when "excellent"
+    "bg-green-500/10 border-green-500/20"
+  when "good"
+    "bg-blue-500/10 border-blue-500/20"
+  when "fair"
+    "bg-yellow-500/10 border-yellow-500/20"
+  else
+    "bg-red-500/10 border-red-500/20"
+  end
+
+  icon_name = case health_status
+  when "excellent" then "check-circle"
+  when "good" then "info"
+  when "fair" then "alert-triangle"
+  else "alert-circle"
+  end
+
+  icon_color = case health_status
+  when "excellent" then "text-green-600"
+  when "good" then "text-blue-600"
+  when "fair" then "text-yellow-600"
+  else "text-red-600"
+  end
+%>
+
+<div class="<%= banner_classes %> border rounded-lg px-4 py-3 mb-6">
+  <div class="flex items-center gap-3">
+    <%= icon(icon_name, size: "md", class: icon_color) %>
+
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-primary">
+          <%= data_quality_title(health_status) %>
+        </span>
+        <% unless compact %>
+          <span class="text-sm text-secondary">
+            <%= t("data_quality_banner.score", score: summary.overall_score) %>
+          </span>
+        <% end %>
+      </div>
+
+      <% unless compact %>
+        <p class="text-sm text-secondary mt-1">
+          <%= data_quality_description(summary) %>
+        </p>
+      <% end %>
+    </div>
+
+    <%= link_to data_sources_path, class: "text-sm font-medium text-primary hover:underline shrink-0" do %>
+      <%= t("data_quality_banner.manage_sources") %>
+      <%= icon("chevron-right", size: "sm", class: "inline") %>
+    <% end %>
+  </div>
+
+  <% unless compact %>
+    <% issues = data_quality_issues(summary) %>
+    <% if issues.any? %>
+      <div class="mt-3 pt-3 border-t border-alpha-black-50">
+        <ul class="space-y-1">
+          <% issues.each do |issue| %>
+            <li class="flex items-center gap-2 text-sm text-secondary">
+              <%= icon("dot", size: "xs", class: issue[:color]) %>
+              <%= issue[:message] %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<% def data_quality_title(health_status)
+  t("data_quality_banner.status.#{health_status}.title")
+end %>
+
+<% def data_quality_description(summary)
+  parts = []
+
+  if summary.price_freshness_score < 100
+    parts << t("data_quality_banner.issues.prices", score: summary.price_freshness_score)
+  end
+
+  if summary.fx_freshness_score < 100
+    parts << t("data_quality_banner.issues.fx_rates", score: summary.fx_freshness_score)
+  end
+
+  if summary.holdings_quality_score < 100
+    parts << t("data_quality_banner.issues.holdings", score: summary.holdings_quality_score)
+  end
+
+  if parts.empty?
+    t("data_quality_banner.status.#{summary.health_status}.description")
+  else
+    parts.join(" • ")
+  end
+end %>
+
+<% def data_quality_issues(summary)
+  issues = []
+
+  if summary.price_freshness_score < 90
+    issues << {
+      color: summary.price_freshness_score < 75 ? "text-red-500" : "text-yellow-500",
+      message: t("data_quality_banner.issues.prices_detail", score: summary.price_freshness_score)
+    }
+  end
+
+  if summary.fx_freshness_score < 90
+    issues << {
+      color: summary.fx_freshness_score < 75 ? "text-red-500" : "text-yellow-500",
+      message: t("data_quality_banner.issues.fx_rates_detail", score: summary.fx_freshness_score)
+    }
+  end
+
+  if summary.holdings_quality_score < 90
+    issues << {
+      color: summary.holdings_quality_score < 75 ? "text-red-500" : "text-yellow-500",
+      message: t("data_quality_banner.issues.holdings_detail", score: summary.holdings_quality_score)
+    }
+  end
+
+  issues
+end %>

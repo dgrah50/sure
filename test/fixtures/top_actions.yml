@@ -1,0 +1,58 @@
+active_rebalance_action:
+  family: dylan_family
+  action_type: rebalance_needed
+  title: "Rebalance portfolio due to drift"
+  description: "Portfolio drift of 8.2% detected."
+  priority: 7
+  context_data:
+    sleeve_id:
+    drift_percentage: 8.2
+  dismissed_at:
+  completed_at:
+
+active_data_quality_action:
+  family: dylan_family
+  action_type: data_quality
+  title: "Stale security prices detected"
+  description: "5 securities have outdated price data."
+  priority: 5
+  context_data:
+    total_stale: 5
+  dismissed_at:
+  completed_at:
+
+dismissed_action:
+  family: dylan_family
+  action_type: cash_idle
+  title: "Idle cash in checking account"
+  description: "Cash allocation is 15%."
+  priority: 3
+  context_data:
+    account_name: "Chase Checking"
+    cash_percentage: 15.0
+  dismissed_at: <%= 2.days.ago.to_s(:db) %>
+  completed_at:
+
+completed_action:
+  family: dylan_family
+  action_type: rebalance_needed
+  title: "Rebalance portfolio"
+  description: "Portfolio rebalanced successfully."
+  priority: 8
+  context_data:
+    sleeve_id:
+  dismissed_at:
+  completed_at: <%= 1.week.ago.to_s(:db) %>
+
+high_priority_action:
+  family: dylan_family
+  action_type: compliance_issue
+  title: "Compliance violation: concentration limit"
+  description: "Position exceeds 25% limit at 32%."
+  priority: 10
+  context_data:
+    guardrail_id:
+    ticker: "AAPL"
+    percentage: 32.0
+  dismissed_at:
+  completed_at:

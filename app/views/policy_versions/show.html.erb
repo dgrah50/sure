@@ -1,0 +1,228 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl lg:text-3xl font-medium text-primary"><%= @policy_version.name %></h1>
+      <% status_color = case @policy_version.status
+         when "active" then "success"
+         when "draft" then "warning"
+         else "secondary"
+         end %>
+      <%= render "shared/badge", color: status_color do %>
+        <%= t(".status_#{@policy_version.status}") %>
+      <% end %>
+    </div>
+    <% if @policy_version.description.present? %>
+      <p class="text-sm lg:text-base text-secondary"><%= @policy_version.description %></p>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="space-y-8">
+  <%# Overview Section %>
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-primary"><%= t(".overview") %></h2>
+      <div class="flex items-center gap-2">
+        <%= link_to policy_versions_path, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary hover:text-primary transition-colors" do %>
+          <%= icon "arrow-left", size: "sm" %>
+          <%= t(".back") %>
+        <% end %>
+        <% if @policy_version.draft? %>
+          <%= link_to edit_policy_version_path(@policy_version), class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary hover:text-primary transition-colors" do %>
+            <%= icon "pencil", size: "sm" %>
+            <%= t(".edit") %>
+          <% end %>
+          <%= button_to publish_policy_version_path(@policy_version),
+              method: :post,
+              class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" do %>
+            <%= icon "check-circle", size: "sm" %>
+            <%= t(".publish") %>
+          <% end %>
+        <% end %>
+        <% if @policy_version.active? %>
+          <%= button_to archive_policy_version_path(@policy_version),
+              method: :post,
+              class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" do %>
+            <%= icon "archive", size: "sm" %>
+            <%= t(".archive") %>
+          <% end %>
+        <% end %>
+        <% if @policy_version.draft? %>
+          <%= button_to policy_version_path(@policy_version),
+              method: :delete,
+              class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors",
+              data: { turbo_confirm: t(".confirm_delete") } do %>
+            <%= icon "trash-2", size: "sm" %>
+            <%= t(".delete") %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-container rounded-xl shadow-border-xs p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <div class="text-xs text-secondary mb-1"><%= t(".effective_date") %></div>
+          <div class="text-sm text-primary font-medium"><%= @policy_version.effective_date&.strftime("%B %d, %Y") || "—" %></div>
+        </div>
+        <div>
+          <div class="text-xs text-secondary mb-1"><%= t(".created_by") %></div>
+          <div class="text-sm text-primary font-medium"><%= @policy_version.created_by&.name || "—" %></div>
+        </div>
+        <div>
+          <div class="text-xs text-secondary mb-1"><%= t(".created_at") %></div>
+          <div class="text-sm text-primary font-medium"><%= @policy_version.created_at.strftime("%B %d, %Y") %></div>
+        </div>
+      </div>
+      <% if @policy_version.draft? && !@policy_version.target_percentage_valid? %>
+        <div class="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+          <%= icon "alert-triangle", size: "sm", color: "destructive" %>
+          <span class="text-sm text-red-600"><%= t(".target_percentage_invalid") %></span>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# Sleeves Section %>
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-primary"><%= t(".sleeves") %></h2>
+      <% if @policy_version.draft? %>
+        <%= link_to new_policy_version_sleeve_path(@policy_version), class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors" do %>
+          <%= icon "plus", size: "sm" %>
+          <%= t(".add_sleeve") %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @sleeves.any? %>
+      <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-surface border-b border-alpha-black-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".sleeve_columns.name") %></th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".sleeve_columns.target") %></th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".sleeve_columns.min") %></th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".sleeve_columns.max") %></th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".sleeve_columns.actions") %></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-alpha-black-50">
+            <% @sleeves.each do |sleeve| %>
+              <tr class="hover:bg-surface/50">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <% if sleeve.color.present? %>
+                      <div class="w-3 h-3 rounded-full" style="background-color: <%= sleeve.color %>"></div>
+                    <% end %>
+                    <div>
+                      <div class="font-medium text-primary">
+                        <%= "  ".repeat(sleeve.depth) if sleeve.depth > 0 %><%= sleeve.name %>
+                      </div>
+                      <% if sleeve.description.present? %>
+                        <div class="text-xs text-secondary"><%= sleeve.description %></div>
+                      <% end %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-right font-medium text-primary">
+                  <%= number_to_percentage(sleeve.target_percentage, precision: 2) %>
+                </td>
+                <td class="px-4 py-3 text-right text-secondary">
+                  <%= sleeve.min_percentage ? number_to_percentage(sleeve.min_percentage, precision: 2) : "—" %>
+                </td>
+                <td class="px-4 py-3 text-right text-secondary">
+                  <%= sleeve.max_percentage ? number_to_percentage(sleeve.max_percentage, precision: 2) : "—" %>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <% if @policy_version.draft? %>
+                    <%= link_to edit_policy_version_sleeve_path(@policy_version, sleeve),
+                        class: "p-1.5 text-secondary hover:bg-surface rounded-md transition-colors",
+                        title: t(".edit_sleeve") do %>
+                      <%= icon "pencil", size: "sm" %>
+                    <% end %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="bg-container rounded-xl shadow-border-xs p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-surface flex items-center justify-center">
+          <%= icon "pie-chart", size: "lg", class: "text-secondary" %>
+        </div>
+        <h3 class="text-base font-medium text-primary"><%= t(".no_sleeves") %></h3>
+        <p class="text-sm text-secondary mt-1"><%= t(".no_sleeves_description") %></p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Guardrails Section %>
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-primary"><%= t(".guardrails") %></h2>
+      <% if @policy_version.draft? %>
+        <%= link_to new_policy_version_guardrail_path(@policy_version), class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors" do %>
+          <%= icon "plus", size: "sm" %>
+          <%= t(".add_guardrail") %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @guardrails.any? %>
+      <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-surface border-b border-alpha-black-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".guardrail_columns.name") %></th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t(".guardrail_columns.type") %></th>
+              <th class="px-4 py-3 text-center text-sm font-medium text-secondary"><%= t(".guardrail_columns.severity") %></th>
+              <th class="px-4 py-3 text-center text-sm font-medium text-secondary"><%= t(".guardrail_columns.enabled") %></th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t(".guardrail_columns.actions") %></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-alpha-black-50">
+            <% @guardrails.each do |guardrail| %>
+              <tr class="hover:bg-surface/50">
+                <td class="px-4 py-3 font-medium text-primary"><%= guardrail.name %></td>
+                <td class="px-4 py-3 text-sm text-secondary"><%= guardrail.guardrail_type.humanize %></td>
+                <td class="px-4 py-3 text-center">
+                  <% severity_color = case guardrail.severity
+                     when "critical" then "error"
+                     when "warning" then "warning"
+                     else "secondary"
+                     end %>
+                  <%= render "shared/badge", color: severity_color do %>
+                    <%= guardrail.severity.titleize %>
+                  <% end %>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <%= guardrail.enabled? ? icon("check", size: "sm", color: "success") : icon("x", size: "sm", color: "secondary") %>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <% if @policy_version.draft? %>
+                    <%= link_to edit_policy_version_guardrail_path(@policy_version, guardrail),
+                        class: "p-1.5 text-secondary hover:bg-surface rounded-md transition-colors",
+                        title: t(".edit_guardrail") do %>
+                      <%= icon "pencil", size: "sm" %>
+                    <% end %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="bg-container rounded-xl shadow-border-xs p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-surface flex items-center justify-center">
+          <%= icon "alert-octagon", size: "lg", class: "text-secondary" %>
+        </div>
+        <h3 class="text-base font-medium text-primary"><%= t(".no_guardrails") %></h3>
+        <p class="text-sm text-secondary mt-1"><%= t(".no_guardrails_description") %></p>
+      </div>
+    <% end %>
+  </section>
+</div>

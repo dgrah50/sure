@@ -1,0 +1,223 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">
+      <%= t("instrument_mappings.index.title") %>
+    </h1>
+    <p class="text-sm lg:text-base text-secondary">
+      <%= t("instrument_mappings.index.subtitle") %>
+    </p>
+  </div>
+<% end %>
+
+<%# Filter Tabs %>
+<div class="mb-6">
+  <div class="inline-flex bg-surface rounded-lg p-1">
+    <%= link_to t("instrument_mappings.index.filters.all"),
+                instrument_mappings_path(filter: "all"),
+                class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@filter == 'all' ? 'bg-container shadow-sm' : 'text-secondary hover:text-primary'}" %>
+    <%= link_to t("instrument_mappings.index.filters.pending"),
+                instrument_mappings_path(filter: "pending"),
+                class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@filter == 'pending' ? 'bg-container shadow-sm' : 'text-secondary hover:text-primary'}" %>
+    <%= link_to t("instrument_mappings.index.filters.approved"),
+                instrument_mappings_path(filter: "approved"),
+                class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@filter == 'approved' ? 'bg-container shadow-sm' : 'text-secondary hover:text-primary'}" %>
+    <%= link_to t("instrument_mappings.index.filters.excluded"),
+                instrument_mappings_path(filter: "excluded"),
+                class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@filter == 'excluded' ? 'bg-container shadow-sm' : 'text-secondary hover:text-primary'}" %>
+  </div>
+</div>
+
+<%# Bulk Actions Bar %>
+<div class="mb-4 p-3 bg-surface rounded-lg flex items-center gap-3" data-controller="instrument-mappings-bulk">
+  <input type="checkbox" data-action="change->instrument-mappings-bulk#toggleAll" class="rounded border-gray-300">
+  <span class="text-sm text-secondary"><%= t("instrument_mappings.index.select_all") %></span>
+
+  <div class="flex-1"></div>
+
+  <%= form_with url: bulk_approve_instrument_mappings_path, method: :post, class: "flex items-center gap-2", data: { action: "submit->instrument-mappings-bulk#validateSelection" } do |f| %>
+    <%= f.hidden_field :filter, value: @filter %>
+    <div data-instrument-mappings-bulk-target="holdingIds"></div>
+
+    <% if @sleeves.any? %>
+      <%= f.select :sleeve_id,
+                   options_from_collection_for_select(@sleeves, :id, :name),
+                   { prompt: t("instrument_mappings.index.select_sleeve") },
+                   class: "text-sm border rounded-md px-2 py-1" %>
+    <% end %>
+
+    <%= f.submit t("instrument_mappings.index.bulk_approve"),
+                 class: "px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50",
+                 disabled: @sleeves.none?,
+                 data: { instrument_mappings_bulk_target: "approveButton" } %>
+  <% end %>
+
+  <%= form_with url: bulk_exclude_instrument_mappings_path, method: :post, class: "flex items-center gap-2", data: { action: "submit->instrument-mappings-bulk#validateSelection" } do |f| %>
+    <%= f.hidden_field :filter, value: @filter %>
+    <div data-instrument-mappings-bulk-target="holdingIdsExclude"></div>
+    <%= f.submit t("instrument_mappings.index.bulk_exclude"),
+                 class: "px-3 py-1.5 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors",
+                 data: { instrument_mappings_bulk_target: "excludeButton" } %>
+  <% end %>
+</div>
+
+<%# Holdings Table %>
+<% if @holdings.any? %>
+  <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-surface border-b border-alpha-black-50">
+        <tr>
+          <th class="px-4 py-3 text-left w-10">
+            <span class="sr-only"><%= t("instrument_mappings.index.columns.select") %></span>
+          </th>
+          <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.security") %></th>
+          <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.value") %></th>
+          <th class="px-4 py-3 text-center text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.status") %></th>
+          <th class="px-4 py-3 text-center text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.confidence") %></th>
+          <th class="px-4 py-3 text-left text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.sleeve") %></th>
+          <th class="px-4 py-3 text-right text-sm font-medium text-secondary"><%= t("instrument_mappings.index.columns.actions") %></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-alpha-black-50">
+        <% @holdings.each do |holding| %>
+          <% mapping = holding.instrument_mapping %>
+          <tr id="<%= dom_id(holding, :instrument_mapping) %>" class="hover:bg-surface/50">
+            <td class="px-4 py-3">
+              <input type="checkbox"
+                     value="<%= holding.id %>"
+                     data-instrument-mappings-bulk-target="checkbox"
+                     data-action="change->instrument-mappings-bulk#updateSelection"
+                     class="rounded border-gray-300">
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-surface flex items-center justify-center">
+                  <%= icon("trending-up", size: "sm", class: "text-secondary") %>
+                </div>
+                <div>
+                  <div class="font-medium text-primary"><%= holding.security.name || holding.security.ticker %></div>
+                  <div class="text-xs text-secondary"><%= holding.security.ticker %> · <%= holding.account.name %></div>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="font-medium text-primary"><%= format_money(holding.amount_money) %></div>
+              <div class="text-xs text-secondary"><%= holding.qty %> <%= t("instrument_mappings.index.units") %></div>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <%= render "shared/badge", color: mapping_status_color(mapping) do %>
+                <%= mapping_status_label(mapping) %>
+              <% end %>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <% if mapping.present? %>
+                <%= render "shared/badge", color: confidence_color(mapping.mapping_confidence) do %>
+                  <%= mapping.mapping_confidence&.titleize || t("instrument_mappings.index.confidence.unknown") %>
+                <% end %>
+              <% else %>
+                <span class="text-sm text-secondary">—</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3">
+              <% if mapping&.approved? && mapping.sleeve.present? %>
+                <span class="text-sm text-primary"><%= mapping.sleeve.name %></span>
+              <% elsif @sleeves.any? && (mapping.nil? || mapping.pending?) %>
+                <%= form_with model: mapping || InstrumentMapping.new(holding: holding), url: mapping ? instrument_mapping_path(mapping) : instrument_mappings_path, method: mapping ? :patch : :post, class: "inline" do |f| %>
+                  <%= f.hidden_field :holding_id, value: holding.id %>
+                  <%= f.hidden_field :action_type, value: "approve" %>
+                  <%= f.select :sleeve_id,
+                               options_from_collection_for_select(@sleeves, :id, :name, mapping&.sleeve_id),
+                               { prompt: t("instrument_mappings.index.map_to_sleeve") },
+                               class: "text-sm border rounded-md px-2 py-1 w-full max-w-[150px]",
+                               onchange: "this.form.submit()" %>
+                <% end %>
+              <% elsif mapping&.excluded? %>
+                <span class="text-sm text-secondary italic"><%= t("instrument_mappings.index.excluded_from_recommendations") %></span>
+              <% else %>
+                <span class="text-sm text-secondary">—</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="flex items-center justify-end gap-1">
+                <% if mapping.present? %>
+                  <% if mapping.pending? %>
+                    <%= button_to instrument_mapping_path(mapping, action_type: "approve", filter: @filter),
+                                  method: :patch,
+                                  class: "p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors",
+                                  title: t("instrument_mappings.index.actions.approve") do %>
+                      <%= icon("check", size: "sm") %>
+                    <% end %>
+                  <% end %>
+
+                  <% if mapping.approved? %>
+                    <%= button_to instrument_mapping_path(mapping, action_type: "reset", filter: @filter),
+                                  method: :patch,
+                                  class: "p-1.5 text-secondary hover:bg-surface rounded-md transition-colors",
+                                  title: t("instrument_mappings.index.actions.reset") do %>
+                      <%= icon("rotate-ccw", size: "sm") %>
+                    <% end %>
+                  <% end %>
+
+                  <% unless mapping.excluded? %>
+                    <%= button_to instrument_mapping_path(mapping, action_type: "exclude", filter: @filter),
+                                  method: :patch,
+                                  class: "p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors",
+                                  title: t("instrument_mappings.index.actions.exclude") do %>
+                      <%= icon("x", size: "sm") %>
+                    <% end %>
+                  <% end %>
+
+                  <% if mapping.excluded? %>
+                    <%= button_to instrument_mapping_path(mapping, action_type: "reset", filter: @filter),
+                                  method: :patch,
+                                  class: "p-1.5 text-secondary hover:bg-surface rounded-md transition-colors",
+                                  title: t("instrument_mappings.index.actions.include") do %>
+                      <%= icon("rotate-ccw", size: "sm") %>
+                    <% end %>
+                  <% end %>
+                <% else %>
+                  <%= button_to instrument_mappings_path(holding_id: holding.id, action_type: "exclude", filter: @filter),
+                                method: :post,
+                                class: "p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors",
+                                title: t("instrument_mappings.index.actions.exclude") do %>
+                    <%= icon("x", size: "sm") %>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="bg-container rounded-xl shadow-border-xs p-8 text-center">
+    <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+      <%= icon("check-circle", size: "lg", class: "text-green-500") %>
+    </div>
+    <h3 class="text-base font-medium mb-2"><%= t("instrument_mappings.index.empty.title") %></h3>
+    <p class="text-sm text-secondary"><%= t("instrument_mappings.index.empty.description") %></p>
+  </div>
+<% end %>
+
+<%# Helper methods %>
+<% def mapping_status_color(mapping)
+  return "secondary" if mapping.nil?
+  case mapping.mapped_status
+  when "approved" then "success"
+  when "excluded" then "error"
+  else "warning"
+  end
+end %>
+
+<% def mapping_status_label(mapping)
+  return t("instrument_mappings.index.status.unmapped") if mapping.nil?
+  mapping.mapped_status.titleize
+end %>
+
+<% def confidence_color(confidence)
+  case confidence
+  when "high" then "success"
+  when "medium" then "warning"
+  else "secondary"
+  end
+end %>

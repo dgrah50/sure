@@ -1,0 +1,101 @@
+<%# locals: (recommendation:) %>
+
+<%= turbo_frame_tag dom_id(recommendation), class: "block" do %>
+  <div class="group relative flex items-start gap-3 p-3 rounded-lg hover:bg-subtle transition-colors <%= recommendation.pending? ? 'bg-container' : 'bg-surface opacity-75' %>">
+    <%# Status Icon %>
+    <div class="shrink-0 mt-0.5">
+      <% if recommendation.pending? %>
+        <%= icon "circle-dot", size: "sm", class: "text-blue-500" %>
+      <% elsif recommendation.approved? %>
+        <%= icon "check", size: "sm", class: "text-green-500" %>
+      <% elsif recommendation.rejected? %>
+        <%= icon "x", size: "sm", class: "text-red-500" %>
+      <% elsif recommendation.executed? %>
+        <%= icon "check-circle-2", size: "sm", class: "text-green-600" %>
+      <% end %>
+    </div>
+
+    <%# Content %>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="text-sm font-medium text-primary truncate"><%= recommendation.title %></h3>
+
+          <div class="flex items-center gap-2 mt-1">
+            <%# Type Badge %>
+            <%= render "shared/badge", color: case recommendation.recommendation_type
+              when "trade" then "info"
+              when "rebalance" then "warning"
+              when "deposit" then "success"
+              when "withdraw" then nil
+              else nil
+            end do %>
+              <%= recommendation.recommendation_type.humanize %>
+            <% end %>
+
+            <%# Status Badge %>
+            <% if recommendation.status != "pending" %>
+              <%= render "shared/badge", color: case recommendation.status
+                when "approved" then "success"
+                when "rejected" then "error"
+                when "executed" then "success"
+                else nil
+              end do %>
+                <%= recommendation.status.humanize %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Amount %>
+        <% if recommendation.total_amount.present? %>
+          <div class="text-right shrink-0">
+            <span class="text-sm font-medium text-primary privacy-sensitive">
+              <%= format_money(Money.new(recommendation.total_amount, Current.family.currency)) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Created Date %>
+      <p class="text-xs text-secondary mt-2">
+        <%= t(".created_at", date: l(recommendation.created_at, format: :short)) %>
+      </p>
+    </div>
+
+    <%# Quick Actions - visible on hover for pending items %>
+    <% if recommendation.pending? %>
+      <div class="hidden group-hover:flex items-center gap-1 shrink-0">
+        <%= button_to approve_recommendation_path(recommendation),
+              method: :patch,
+              class: "p-1.5 rounded-md text-green-600 hover:bg-green-50 transition-colors",
+              title: t(".approve"),
+              data: { turbo_confirm: t(".confirm_approve") } do %>
+          <%= icon "check", size: "sm" %>
+        <% end %>
+
+        <%= button_to reject_recommendation_path(recommendation),
+              method: :patch,
+              class: "p-1.5 rounded-md text-red-600 hover:bg-red-50 transition-colors",
+              title: t(".reject"),
+              data: { turbo_confirm: t(".confirm_reject") } do %>
+          <%= icon "x", size: "sm" %>
+        <% end %>
+
+        <%= link_to recommendation_path(recommendation),
+              data: { turbo_frame: :drawer },
+              class: "p-1.5 rounded-md text-secondary hover:bg-subtle transition-colors",
+              title: t(".view_details") do %>
+          <%= icon "arrow-right", size: "sm" %>
+        <% end %>
+      </div>
+    <% else %>
+      <%= link_to recommendation_path(recommendation),
+            data: { turbo_frame: :drawer },
+            class: "shrink-0 p-1.5 rounded-md text-secondary hover:text-primary hover:bg-subtle transition-colors",
+            title: t(".view_details") do %>
+        <%= icon "arrow-right", size: "sm" %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

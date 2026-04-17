@@ -1,0 +1,118 @@
+<%= render DS::Dialog.new(frame: "drawer", responsive: true) do |dialog| %>
+  <% dialog.with_header(custom_header: true) do %>
+    <div class="relative">
+      <div class="absolute right-0 top-0 z-10">
+        <%= dialog.close_button %>
+      </div>
+
+      <div class="space-y-3 pr-10">
+        <%# Decision Type Badge %>
+        <%= render "shared/badge", color: case @decision_log.decision_type
+          when "recommendation_approved" then "success"
+          when "recommendation_rejected" then "error"
+          when "action_dismissed" then "warning"
+          when "manual_override" then "info"
+          else nil
+        end do %>
+          <%= @decision_log.decision_type.humanize %>
+        <% end %>
+
+        <h1 class="text-xl font-medium text-primary">
+          <%= @decision_log.decision_type.humanize %>
+        </h1>
+
+        <p class="text-sm text-secondary">
+          <%= t(".timestamp", date: l(@decision_log.created_at, format: :long)) %>
+        </p>
+      </div>
+    </div>
+  <% end %>
+
+  <% dialog.with_body do %>
+    <%# Decision Details Section %>
+    <% dialog.with_section(title: t(".details"), open: true) do %>
+      <div class="space-y-3 pb-4">
+        <%# Actor %>
+        <div class="flex items-center justify-between py-2 border-b border-primary">
+          <span class="text-secondary text-sm"><%= t(".actor_label") %></span>
+          <span class="text-primary font-medium"><%= @decision_log.actor.name %></span>
+        </div>
+
+        <%# Reference Type & ID %>
+        <div class="flex items-center justify-between py-2 border-b border-primary">
+          <span class="text-secondary text-sm"><%= t(".reference_type_label") %></span>
+          <span class="text-primary"><%= @decision_log.reference_type %></span>
+        </div>
+
+        <div class="flex items-center justify-between py-2 border-b border-primary">
+          <span class="text-secondary text-sm"><%= t(".reference_id_label") %></span>
+          <span class="text-primary font-mono text-xs"><%= @decision_log.reference_id %></span>
+        </div>
+
+        <%# Linked Reference (if exists) %>
+        <% if @decision_log.reference.present? %>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-secondary text-sm"><%= t(".linked_reference_label") %></span>
+            <%= link_to @decision_log.reference.respond_to?(:title) ? @decision_log.reference.title : "##{@decision_log.reference.id}",
+                  polymorphic_path(@decision_log.reference),
+                  data: { turbo_frame: :drawer },
+                  class: "text-primary hover:underline text-sm" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Rationale Section %>
+    <% dialog.with_section(title: t(".rationale"), open: true) do %>
+      <div class="pb-4">
+        <% if @decision_log.rationale.present? %>
+          <div class="p-3 bg-surface rounded-lg">
+            <p class="text-sm text-primary"><%= @decision_log.rationale %></p>
+          </div>
+        <% else %>
+          <p class="text-sm text-secondary italic"><%= t(".no_rationale") %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Metadata Section %>
+    <% if @decision_log.metadata.present? && @decision_log.metadata.any? %>
+      <% dialog.with_section(title: t(".metadata"), open: false) do %>
+        <div class="space-y-2 pb-4">
+          <% @decision_log.metadata.each do |key, value| %>
+            <div class="flex items-center justify-between py-2 border-b border-primary last:border-b-0">
+              <span class="text-secondary text-sm"><%= key.humanize %></span>
+              <span class="text-primary text-sm font-mono">
+                <% if value.is_a?(Hash) || value.is_a?(Array) %>
+                  <code class="bg-surface px-2 py-1 rounded text-xs"><%= value.to_json %></code>
+                <% else %>
+                  <%= value %>
+                <% end %>
+              </span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Audit Information %>
+    <% dialog.with_section(title: t(".audit"), open: false) do %>
+      <div class="space-y-3 pb-4">
+        <div class="flex items-center justify-between py-2 border-b border-primary">
+          <span class="text-secondary text-sm"><%= t(".created_at_label") %></span>
+          <span class="text-primary text-sm"><%= l(@decision_log.created_at, format: :long) %></span>
+        </div>
+
+        <div class="flex items-center justify-between py-2 border-b border-primary">
+          <span class="text-secondary text-sm"><%= t(".log_id_label") %></span>
+          <span class="text-primary font-mono text-xs"><%= @decision_log.id %></span>
+        </div>
+
+        <div class="flex items-center justify-between py-2">
+          <span class="text-secondary text-sm"><%= t(".family_label") %></span>
+          <span class="text-primary text-sm"><%= @decision_log.family.name %></span>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

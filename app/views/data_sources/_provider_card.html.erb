@@ -1,0 +1,86 @@
+<%# locals: (item:, provider_type:, health_status:) %>
+
+<div id="<%= dom_id(item, :data_source) %>" class="bg-container rounded-xl shadow-border-xs p-4">
+  <div class="flex items-start justify-between mb-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center">
+        <%= provider_icon(provider_type) %>
+      </div>
+      <div>
+        <h3 class="font-medium text-primary"><%= item.name || provider_type.to_s.titleize %></h3>
+        <p class="text-xs text-secondary">
+          <%= t("data_sources.provider_card.accounts", count: item.respond_to?(:accounts) ? item.accounts.count : 0) %>
+        </p>
+      </div>
+    </div>
+    <%= render "shared/badge", color: health_status&.status_badge_color || "success" do %>
+      <%= health_status&.status_label || t("data_sources.states.connected") %>
+    <% end %>
+  </div>
+
+  <% if health_status&.error_message.present? %>
+    <div class="mb-3 p-2 bg-red-50 rounded-lg text-sm text-red-700">
+      <%= icon("alert-circle", size: "sm", class: "inline mr-1") %>
+      <%= health_status.error_message %>
+    </div>
+  <% end %>
+
+  <div class="flex items-center justify-between text-sm">
+    <span class="text-secondary">
+      <% if health_status&.last_sync_at.present? %>
+        <%= t("data_sources.provider_card.last_sync", time: time_ago_in_words(health_status.last_sync_at)) %>
+      <% else %>
+        <%= t("data_sources.provider_card.never_synced") %>
+      <% end %>
+    </span>
+
+    <div class="flex items-center gap-2">
+      <%= button_to sync_provider_path(item),
+                    class: "p-1.5 text-secondary hover:text-primary transition-colors",
+                    title: t("data_sources.provider_card.sync"),
+                    data: { turbo: true } do %>
+        <%= icon("refresh-cw", size: "sm") %>
+      <% end %>
+
+      <%= button_to disconnect_data_source_path(health_status || item),
+                    class: "p-1.5 text-secondary hover:text-red-600 transition-colors",
+                    title: t("data_sources.provider_card.disconnect"),
+                    data: { turbo_confirm: t("data_sources.provider_card.disconnect_confirm") } do %>
+        <%= icon("unlink", size: "sm") %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<% def provider_icon(provider_type)
+  icon_name = case provider_type
+  when :plaid then "landmark"
+  when :simplefin then "wallet"
+  when :coinbase then "coins"
+  when :binance then "bitcoin"
+  when :coinstats then "chart-pie"
+  when :snaptrade then "building-2"
+  when :mercury then "credit-card"
+  when :indexa_capital then "trending-up"
+  when :lunchflow then "utensils"
+  when :enable_banking then "euro"
+  else "database"
+  end
+  icon(icon_name, size: "md", class: "text-secondary")
+end %>
+
+<% def sync_provider_path(item)
+  case item.class.name
+  when "PlaidItem" then sync_plaid_item_path(item)
+  when "SimplefinItem" then sync_simplefin_item_path(item)
+  when "CoinbaseItem" then sync_coinbase_item_path(item)
+  when "BinanceItem" then sync_binance_item_path(item)
+  when "CoinstatsItem" then sync_coinstats_item_path(item)
+  when "SnaptradeItem" then sync_snaptrade_item_path(item)
+  when "MercuryItem" then sync_mercury_item_path(item)
+  when "IndexaCapitalItem" then sync_indexa_capital_item_path(item)
+  when "LunchflowItem" then sync_lunchflow_item_path(item)
+  when "EnableBankingItem" then sync_enable_banking_item_path(item)
+  else "#"
+  end
+end %>

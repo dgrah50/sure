@@ -1,0 +1,70 @@
+<%= render "layouts/shared/page_header", title: t(".title") %>
+
+<div class="max-w-2xl">
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <%= styled_form_with model: @sleeve,
+        url: policy_version_sleeves_path(@policy_version),
+        class: "space-y-6" do |f| %>
+      <% if @sleeve.errors.any? %>
+        <%= render "shared/form_errors", model: @sleeve %>
+      <% end %>
+
+      <section class="space-y-4">
+        <%= f.text_field :name,
+            label: t(".name_label"),
+            placeholder: t(".name_placeholder"),
+            required: true,
+            autofocus: true %>
+
+        <%= f.text_area :description,
+            label: t(".description_label"),
+            placeholder: t(".description_placeholder"),
+            rows: 3 %>
+
+        <%= f.number_field :target_percentage,
+            label: t(".target_percentage_label"),
+            min: 0,
+            max: 100,
+            step: 0.01,
+            required: true,
+            hint: t(".target_percentage_hint") %>
+
+        <div class="grid grid-cols-2 gap-4">
+          <%= f.number_field :min_percentage,
+              label: t(".min_percentage_label"),
+              min: 0,
+              max: 100,
+              step: 0.01 %>
+
+          <%= f.number_field :max_percentage,
+              label: t(".max_percentage_label"),
+              min: 0,
+              max: 100,
+              step: 0.01 %>
+        </div>
+
+        <%= f.number_field :sort_order,
+            label: t(".sort_order_label"),
+            min: 0,
+            step: 1,
+            hint: t(".sort_order_hint") %>
+
+        <%= f.color_field :color,
+            label: t(".color_label") %>
+
+        <%= f.collection_select :parent_sleeve_id,
+            @policy_version.sleeves.where.not(id: @sleeve.id).order(:name),
+            :id,
+            :name,
+            { include_blank: t(".no_parent"), label: t(".parent_sleeve_label") } %>
+      </section>
+
+      <section class="flex items-center gap-3 pt-4 border-t border-alpha-black-50">
+        <%= f.submit t(".submit") %>
+        <%= link_to t(".cancel"),
+            policy_version_path(@policy_version),
+            class: "text-sm text-secondary hover:text-primary transition-colors" %>
+      </section>
+    <% end %>
+  </div>
+</div>

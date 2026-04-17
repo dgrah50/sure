@@ -24,6 +24,8 @@ class PagesController < ApplicationController
     @cashflow_sankey_data = build_cashflow_sankey_data(net_totals, income_totals, expense_totals, family_currency)
     @outflows_data = build_outflows_donut_data(net_totals)
 
+    @top_action = Current.family.top_actions.active.ordered.first
+
     @dashboard_sections = build_dashboard_sections
 
     @breadcrumbs = [ [ "Home", root_path ], [ "Dashboard", nil ] ]
@@ -85,6 +87,14 @@ class PagesController < ApplicationController
 
     def build_dashboard_sections
       all_sections = [
+        {
+          key: "top_action",
+          title: "pages.dashboard.top_action.title",
+          partial: "pages/dashboard/top_action",
+          locals: { top_action: @top_action },
+          visible: true,
+          collapsible: false
+        },
         {
           key: "cashflow_sankey",
           title: "pages.dashboard.cashflow_sankey.title",

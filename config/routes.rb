@@ -215,6 +215,16 @@ Rails.application.routes.draw do
     delete :destroy_all, on: :collection
   end
 
+  resources :policy_versions do
+    member do
+      post :publish
+      post :archive
+    end
+
+    resources :sleeves, only: %i[new create edit update destroy]
+    resources :guardrails, only: %i[new create edit update destroy]
+  end
+
   resources :reports, only: %i[index] do
     patch :update_preferences, on: :collection
     get :export_transactions, on: :collection
@@ -239,6 +249,24 @@ Rails.application.routes.draw do
     post :confirm_create, on: :collection
     post :confirm_update, on: :member
   end
+
+  # Recommendation Engine routes
+  resources :recommendations, only: [:index, :show] do
+    member do
+      post :approve
+      post :reject
+      post :dismiss
+      post :complete
+    end
+  end
+
+  resource :top_action, only: [:show] do
+    post :dismiss
+    post :complete
+    post :refresh
+  end
+
+  resources :decision_logs, only: [:index, :show]
 
   resources :transactions, only: %i[index new create show update destroy] do
     resource :split, only: %i[new create edit update destroy]
@@ -456,6 +484,18 @@ Rails.application.routes.draw do
       member do
         delete :invitations, to: "invitations#destroy_all"
       end
+    end
+  end
+
+  resource :data_sources, only: [:show] do
+    post :sync_all
+    post :disconnect
+  end
+
+  resources :instrument_mappings, only: [:index, :create, :update] do
+    collection do
+      post :bulk_approve
+      post :bulk_exclude
     end
   end
 

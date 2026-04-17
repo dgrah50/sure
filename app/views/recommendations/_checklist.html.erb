@@ -1,0 +1,145 @@
+<%# locals: (recommendation:) %>
+
+<div class="space-y-4 pb-4">
+  <p class="text-sm text-secondary"><%= t(".description") %></p>
+
+  <div class="space-y-3" data-controller="checklist">
+    <%# Data Quality Check %>
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-surface border border-primary">
+      <div class="shrink-0 mt-0.5">
+        <% if recommendation.preconditions["data_quality"] %>
+          <%= icon "check-circle-2", size: "sm", class: "text-green-500" %>
+        <% else %>
+          <%= icon "circle", size: "sm", class: "text-secondary" %>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-primary"><%= t(".data_quality.title") %></span>
+          <% if recommendation.preconditions["data_quality"] %>
+            <%= render "shared/badge", color: "success" do %>
+              <%= t(".pass") %>
+            <% end %>
+          <% else %>
+            <%= render "shared/badge", color: "warning" do %>
+              <%= t(".check") %>
+            <% end %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary mt-1"><%= t(".data_quality.description") %></p>
+      </div>
+    </div>
+
+    <%# Policy Compliance Check %>
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-surface border border-primary">
+      <div class="shrink-0 mt-0.5">
+        <% if recommendation.preconditions["policy_compliance"] %>
+          <%= icon "check-circle-2", size: "sm", class: "text-green-500" %>
+        <% else %>
+          <%= icon "circle", size: "sm", class: "text-secondary" %>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-primary"><%= t(".policy_compliance.title") %></span>
+          <% if recommendation.preconditions["policy_compliance"] %>
+            <%= render "shared/badge", color: "success" do %>
+              <%= t(".pass") %>
+            <% end %>
+          <% else %>
+            <%= render "shared/badge", color: "error" do %>
+              <%= t(".fail") %>
+            <% end %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary mt-1"><%= t(".policy_compliance.description") %></p>
+      </div>
+    </div>
+
+    <%# Account Restriction Check %>
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-surface border border-primary">
+      <div class="shrink-0 mt-0.5">
+        <% if recommendation.preconditions["account_restrictions"] %>
+          <%= icon "check-circle-2", size: "sm", class: "text-green-500" %>
+        <% else %>
+          <%= icon "circle", size: "sm", class: "text-secondary" %>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-primary"><%= t(".account_restrictions.title") %></span>
+          <% if recommendation.preconditions["account_restrictions"] %>
+            <%= render "shared/badge", color: "success" do %>
+              <%= t(".pass") %>
+            <% end %>
+          <% else %>
+            <%= render "shared/badge", color: "warning" do %>
+              <%= t(".check") %>
+            <% end %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary mt-1"><%= t(".account_restrictions.description") %></p>
+      </div>
+    </div>
+
+    <%# Liquidity Floor Check %>
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-surface border border-primary">
+      <div class="shrink-0 mt-0.5">
+        <% if recommendation.preconditions["liquidity_floor"] %>
+          <%= icon "check-circle-2", size: "sm", class: "text-green-500" %>
+        <% else %>
+          <%= icon "circle", size: "sm", class: "text-secondary" %>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-primary"><%= t(".liquidity_floor.title") %></span>
+          <% if recommendation.preconditions["liquidity_floor"] %>
+            <%= render "shared/badge", color: "success" do %>
+              <%= t(".pass") %>
+            <% end %>
+          <% else %>
+            <%= render "shared/badge", color: "error" do %>
+              <%= t(".fail") %>
+            <% end %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary mt-1"><%= t(".liquidity_floor.description") %></p>
+      </div>
+    </div>
+
+    <%# Concentration Check %>
+    <div class="flex items-start gap-3 p-3 rounded-lg bg-surface border border-primary">
+      <div class="shrink-0 mt-0.5">
+        <% if recommendation.preconditions["concentration"] %>
+          <%= icon "check-circle-2", size: "sm", class: "text-green-500" %>
+        <% else %>
+          <%= icon "circle", size: "sm", class: "text-secondary" %>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-primary"><%= t(".concentration.title") %></span>
+          <% if recommendation.preconditions["concentration"] %>
+            <%= render "shared/badge", color: "success" do %>
+              <%= t(".pass") %>
+            <% end %>
+          <% else %>
+            <%= render "shared/badge", color: "warning" do %>
+              <%= t(".check") %>
+            <% end %>
+          <% end %>
+        </div>
+        <p class="text-xs text-secondary mt-1"><%= t(".concentration.description") %></p>
+      </div>
+    </div>
+  </div>
+
+  <%# Warning if any checks fail %>
+  <% unless recommendation.preconditions.values.all? %>
+    <%= render DS::Alert.new(
+      message: t(".warning"),
+      variant: :warning
+    ) %>
+  <% end %>
+</div>

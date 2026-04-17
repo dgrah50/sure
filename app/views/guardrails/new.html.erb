@@ -1,0 +1,62 @@
+<%= render "layouts/shared/page_header", title: t(".title") %>
+
+<div class="max-w-2xl">
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <%= styled_form_with model: @guardrail,
+        url: policy_version_guardrails_path(@policy_version),
+        class: "space-y-6" do |f| %>
+      <% if @guardrail.errors.any? %>
+        <%= render "shared/form_errors", model: @guardrail %>
+      <% end %>
+
+      <section class="space-y-4">
+        <%= f.text_field :name,
+            label: t(".name_label"),
+            placeholder: t(".name_placeholder"),
+            required: true,
+            autofocus: true %>
+
+        <%= f.select :guardrail_type,
+            options_for_select(
+              Guardrail::GUARDRAIL_TYPES.map { |t| [t.humanize, t] },
+              @guardrail.guardrail_type
+            ),
+            { label: t(".type_label") },
+            { required: true } %>
+
+        <%= f.select :severity,
+            options_for_select(
+              Guardrail::SEVERITY_LEVELS.map { |s| [s.titleize, s] },
+              @guardrail.severity
+            ),
+            { label: t(".severity_label") },
+            { required: true } %>
+
+        <%= f.check_box :enabled,
+            label: t(".enabled_label"),
+            checked: @guardrail.enabled? %>
+
+        <%= render DS::Disclosure.new(title: t(".configuration_title")) do %>
+          <div class="space-y-4 pt-4">
+            <p class="text-sm text-secondary"><%= t(".configuration_description") %></p>
+            <%= f.fields_for :configuration do |cf| %>
+              <%= cf.number_field :threshold,
+                  label: t(".threshold_label"),
+                  min: 0,
+                  step: 0.01,
+                  value: @guardrail.configuration&.dig("threshold"),
+                  hint: t(".threshold_hint") %>
+            <% end %>
+          </div>
+        <% end %>
+      </section>
+
+      <section class="flex items-center gap-3 pt-4 border-t border-alpha-black-50">
+        <%= f.submit t(".submit") %>
+        <%= link_to t(".cancel"),
+            policy_version_path(@policy_version),
+            class: "text-sm text-secondary hover:text-primary transition-colors" %>
+      </section>
+    <% end %>
+  </div>
+</div>

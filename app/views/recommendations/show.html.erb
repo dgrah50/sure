@@ -1,0 +1,173 @@
+<%= render DS::Dialog.new(frame: "drawer", responsive: true) do |dialog| %>
+  <% dialog.with_header(custom_header: true) do %>
+    <div class="relative">
+      <div class="absolute right-0 top-0 z-10">
+        <%= dialog.close_button %>
+      </div>
+
+      <div class="space-y-3 pr-10">
+        <%# Type and Status Badges %>
+        <div class="flex items-center gap-2 flex-wrap">
+          <%= render "shared/badge", color: case @recommendation.recommendation_type
+            when "trade" then "info"
+            when "rebalance" then "warning"
+            when "deposit" then "success"
+            when "withdraw" then nil
+            else nil
+          end do %>
+            <%= @recommendation.recommendation_type.humanize %>
+          <% end %>
+
+          <%= render "shared/badge", color: case @recommendation.status
+            when "pending" then "info"
+            when "approved" then "success"
+            when "rejected" then "error"
+            when "executed" then "success"
+            else nil
+          end do %>
+            <%= @recommendation.status.humanize %>
+          <% end %>
+        </div>
+
+        <h1 class="text-xl font-medium text-primary"><%= @recommendation.title %></h1>
+
+        <% if @recommendation.total_amount.present? %>
+          <p class="text-2xl font-semibold text-primary privacy-sensitive">
+            <%= format_money(Money.new(@recommendation.total_amount, Current.family.currency)) %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% dialog.with_body do %>
+    <%# Rationale Section %>
+    <% if @recommendation.rationale.present? %>
+      <% dialog.with_section(title: t(".rationale"), open: true) do %>
+        <div class="pb-4 text-sm text-primary">
+          <%= simple_format(@recommendation.rationale) %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Trades Section %>
+    <% if @recommendation.trades.any? %>
+      <% dialog.with_section(title: t(".trades"), open: true) do %>
+        <div class="space-y-3 pb-4">
+          <% @recommendation.trades.each do |trade| %>
+            <div class="p-3 bg-surface rounded-lg border border-primary">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <%= icon trade["type"] == "buy" ? "arrow-down-left" : "arrow-up-right",
+                        size: "sm",
+                        class: trade["type"] == "buy" ? "text-green-600" : "text-red-600" %>
+                  <span class="font-medium text-primary"><%= trade["ticker"] %></span>
+                </div>
+                <span class="text-sm text-primary privacy-sensitive">
+                  <%= format_money(Money.new(trade["amount_cents"], Current.family.currency)) %>
+                </span>
+              </div>
+              <% if trade["qty"].present? %>
+                <p class="text-xs text-secondary mt-1">
+                  <%= trade["qty"] %> <%= t(".shares_at", price: format_money(Money.new(trade["price_cents"], Current.family.currency))) %>
+                </p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Preconditions Checklist Section %>
+    <% if @recommendation.preconditions.present? %>
+      <% dialog.with_section(title: t(".preconditions"), open: true) do %>
+        <%= render "checklist", recommendation: @recommendation %>
+      <% end %>
+    <% end %>
+
+    <%# Confidence Breakdown Section %>
+    <% if @recommendation.confidence_factors.present? %>
+      <% dialog.with_section(title: t(".confidence"), open: false) do %>
+        <div class="space-y-3 pb-4">
+          <% @recommendation.confidence_factors.each do |factor, score| %>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-secondary"><%= factor.humanize %></span>
+              <div class="flex items-center gap-2">
+                <div class="w-24 h-2 bg-surface rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full" style="width: <%= (score * 100).round %>%"></div>
+                </div>
+                <span class="text-xs text-primary w-10 text-right"><%= number_to_percentage(score * 100, precision: 0) %></span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Invalidation Conditions Section %>
+    <% if @recommendation.invalidation_conditions.present? %>
+      <% dialog.with_section(title: t(".invalidation"), open: false) do %>
+        <div class="space-y-2 pb-4">
+          <% @recommendation.invalidation_conditions.each do |condition| %>
+            <%= render DS::Alert.new(
+              message: condition["description"],
+              variant: :info
+            ) %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Next Review Section %>
+    <% if @recommendation.next_review_at.present? %>
+      <% dialog.with_section(title: t(".review_schedule"), open: false) do %>
+        <div class="pb-4">
+          <p class="text-sm text-secondary">
+            <%= t(".next_review", date: l(@recommendation.next_review_at, format: :long)) %>
+          </p>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Audit Trail %>
+    <% if @recommendation.approved_by.present? || @recommendation.executed_at.present? %>
+      <% dialog.with_section(title: t(".audit"), open: false) do %>
+        <div class="space-y-2 pb-4 text-sm">
+          <% if @recommendation.approved_by.present? %>
+            <div class="flex items-center justify-between py-2 border-b border-primary">
+              <span class="text-secondary"><%= t(".approved_by") %></span>
+              <span class="text-primary"><%= @recommendation.approved_by.name %></span>
+            </div>
+          <% end %>
+          <% if @recommendation.executed_at.present? %>
+            <div class="flex items-center justify-between py-2">
+              <span class="text-secondary"><%= t(".executed_at") %></span>
+              <span class="text-primary"><%= l(@recommendation.executed_at, format: :long) %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%# Action Buttons - Only for pending recommendations %>
+    <% if @recommendation.pending? %>
+      <div class="flex items-center gap-3 p-4 border-t border-primary">
+        <%= button_to approve_recommendation_path(@recommendation),
+              method: :patch,
+              class: "flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors",
+              data: { turbo_confirm: t(".confirm_approve") } do %>
+          <%= icon "check", size: "sm" %>
+          <%= t(".approve") %>
+        <% end %>
+
+        <%= button_to reject_recommendation_path(@recommendation),
+              method: :patch,
+              class: "flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg border border-secondary text-secondary text-sm font-medium hover:bg-subtle transition-colors",
+              data: { turbo_confirm: t(".confirm_reject") } do %>
+          <%= icon "x", size: "sm" %>
+          <%= t(".reject") %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,38 @@
+en:
+  data_sources:
+    show:
+      title: "Data Sources"
+      subtitle: "Manage your connected financial institutions and data quality"
+      data_quality:
+        title: "Data Quality"
+        unknown: "Unknown"
+        price_freshness: "Price Freshness"
+        fx_freshness: "FX Rate Freshness"
+        holdings_quality: "Holdings Quality"
+      connected_providers: "Connected Providers"
+      sync_all: "Sync All"
+      no_providers:
+        title: "No Connected Providers"
+        description: "Connect your financial institutions to sync your accounts automatically."
+        connect: "Connect an account"
+    states:
+      connected: "Connected"
+      disconnected: "Disconnected"
+      stale: "Stale"
+      error: "Error"
+    provider_card:
+      accounts:
+        one: "1 account"
+        other: "%{count} accounts"
+      last_sync: "Synced %{time} ago"
+      never_synced: "Never synced"
+      sync: "Sync now"
+      disconnect: "Disconnect"
+      disconnect_confirm: "Are you sure you want to disconnect this provider?"
+    sync_all:
+      success:
+        one: "1 provider queued for sync"
+        other: "%{count} providers queued for sync"
+      no_sync_needed: "All providers are already up to date"
+    disconnect:
+      success: "Provider disconnected successfully"

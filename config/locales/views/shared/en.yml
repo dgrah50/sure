@@ -19,3 +19,38 @@ en:
     require_admin: "Only admins can perform this action"
     trend_change:
       no_change: "no change"
+
+  data_health_statuses:
+    states:
+      connected: "Connected"
+      disconnected: "Disconnected"
+      stale: "Stale"
+      error: "Error"
+
+  data_quality_banner:
+    score: "Score: %{score}%"
+    manage_sources: "Manage sources"
+    status:
+      excellent:
+        title: "Data Quality Excellent"
+        description: "All your data sources are healthy and up to date."
+      good:
+        title: "Data Quality Good"
+        description: "Most of your data sources are healthy."
+      fair:
+        title: "Data Quality Fair"
+        description: "Some of your data sources need attention."
+      poor:
+        title: "Data Quality Poor"
+        description: "Several data sources require immediate attention."
+      critical:
+        title: "Data Quality Critical"
+        description: "Data quality issues are affecting your portfolio."
+    issues:
+      prices: "Prices: %{score}%"
+      fx_rates: "FX: %{score}%"
+      holdings: "Holdings: %{score}%"
+      prices_detail: "%{score}% of security prices are fresh"
+      fx_rates_detail: "%{score}% of exchange rates are fresh"
+      holdings_detail: "%{score}% average confidence in holdings"
+

@@ -1,0 +1,86 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">
+      <%= t("data_sources.show.title") %>
+    </h1>
+    <p class="text-sm lg:text-base text-secondary">
+      <%= t("data_sources.show.subtitle") %>
+    </p>
+  </div>
+<% end %>
+
+<div class="space-y-6">
+  <%# Data Quality Summary Card %>
+  <section class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-medium"><%= t("data_sources.show.data_quality.title") %></h2>
+      <%= render shared/_badge.html.erb, color: @data_quality_summary&.health_status == "excellent" ? "success" : (@data_quality_summary&.health_status == "good" ? "warning" : nil) do %>
+        <%= @data_quality_summary&.health_status&.titleize || t("data_sources.show.data_quality.unknown") %>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="p-3 bg-surface rounded-lg">
+        <div class="text-sm text-secondary mb-1"><%= t("data_sources.show.data_quality.price_freshness") %></div>
+        <div class="text-2xl font-semibold <%= freshness_color_class(@data_quality_summary&.price_freshness_score) %>">
+          <%= @data_quality_summary&.price_freshness_score || 100 %>%
+        </div>
+      </div>
+      <div class="p-3 bg-surface rounded-lg">
+        <div class="text-sm text-secondary mb-1"><%= t("data_sources.show.data_quality.fx_freshness") %></div>
+        <div class="text-2xl font-semibold <%= freshness_color_class(@data_quality_summary&.fx_freshness_score) %>">
+          <%= @data_quality_summary&.fx_freshness_score || 100 %>%
+        </div>
+      </div>
+      <div class="p-3 bg-surface rounded-lg">
+        <div class="text-sm text-secondary mb-1"><%= t("data_sources.show.data_quality.holdings_quality") %></div>
+        <div class="text-2xl font-semibold <%= freshness_color_class(@data_quality_summary&.holdings_quality_score) %>">
+          <%= @data_quality_summary&.holdings_quality_score || 100 %>%
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# Provider Groups %>
+  <% if @provider_groups.any? %>
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-medium"><%= t("data_sources.show.connected_providers") %></h2>
+        <%= button_to sync_all_data_sources_path,
+                      class: "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors",
+                      data: { turbo: true } do %>
+          <%= icon("refresh-cw", size: "sm") %>
+          <%= t("data_sources.show.sync_all") %>
+        <% end %>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% @provider_groups.each do |provider_type, items| %>
+          <% items.each do |item| %>
+            <% health_status = @health_statuses.find { |h| h.provider_id == item.id && h.provider_type == item.class.name } %>
+            <%= render "data_sources/provider_card", item: item, provider_type: provider_type, health_status: health_status %>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% else %>
+    <section class="bg-container rounded-xl shadow-border-xs p-8 text-center">
+      <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+        <%= icon("plug", size: "lg", class: "text-secondary") %>
+      </div>
+      <h3 class="text-base font-medium mb-2"><%= t("data_sources.show.no_providers.title") %></h3>
+      <p class="text-sm text-secondary mb-4"><%= t("data_sources.show.no_providers.description") %></p>
+      <%= link_to t("data_sources.show.no_providers.connect"), accounts_path, class: "text-sm font-medium text-primary hover:underline" %>
+    </section>
+  <% end %>
+</div>
+
+<%# Helper method for color classes %>
+<% def freshness_color_class(score)
+  return "text-secondary" if score.nil?
+  case score
+  when 90..100 then "text-green-600"
+  when 75...90 then "text-yellow-600"
+  else "text-red-600"
+  end
+end %>

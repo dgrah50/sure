@@ -3,7 +3,7 @@ class Recommendation < ApplicationRecord
   belongs_to :policy_version, optional: true
   belongs_to :approved_by, class_name: "User", optional: true
 
-  RECOMMENDATION_TYPES = %w[trade rebalance deposit withdraw review].freeze
+  RECOMMENDATION_TYPES = %w[trade rebalance deposit withdraw review wait].freeze
   STATUSES = %w[pending approved rejected executed].freeze
 
   validates :family, presence: true

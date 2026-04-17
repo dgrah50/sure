@@ -1,0 +1,46 @@
+en:
+  instrument_mappings:
+    index:
+      title: "Instrument Classification"
+      subtitle: "Map holdings to policy sleeves for portfolio allocation"
+      filters:
+        all: "All"
+        pending: "Pending"
+        approved: "Approved"
+        excluded: "Excluded"
+      select_all: "Select all"
+      select_sleeve: "Select sleeve..."
+      map_to_sleeve: "Map to sleeve..."
+      excluded_from_recommendations: "Excluded from recommendations"
+      bulk_approve: "Approve"
+      bulk_exclude: "Exclude"
+      columns:
+        select: "Select"
+        security: "Security"
+        value: "Value"
+        status: "Status"
+        confidence: "Confidence"
+        sleeve: "Sleeve"
+        actions: "Actions"
+      units: "units"
+      status:
+        unmapped: "Unmapped"
+      confidence:
+        unknown: "Unknown"
+      actions:
+        approve: "Approve mapping"
+        exclude: "Exclude from recommendations"
+        reset: "Reset to pending"
+        include: "Include in recommendations"
+      empty:
+        title: "All Holdings Classified"
+        description: "All your holdings have been mapped to policy sleeves."
+    create:
+      success: "Mapping created successfully"
+    update:
+      success: "Mapping updated successfully"
+    bulk_approve:
+      success: "%{count} holdings approved"
+      sleeve_required: "Please select a sleeve"
+    bulk_exclude:
+      success: "%{count} holdings excluded"

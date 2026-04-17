@@ -1,0 +1,32 @@
+<%= render "layouts/shared/page_header", title: t(".title") %>
+
+<div class="max-w-2xl">
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <%= styled_form_with model: @policy_version, class: "space-y-6" do |f| %>
+      <% if @policy_version.errors.any? %>
+        <%= render "shared/form_errors", model: @policy_version %>
+      <% end %>
+
+      <section class="space-y-4">
+        <%= f.text_field :name,
+            label: t(".name_label"),
+            placeholder: t(".name_placeholder"),
+            required: true %>
+
+        <%= f.text_area :description,
+            label: t(".description_label"),
+            placeholder: t(".description_placeholder"),
+            rows: 3 %>
+
+        <%= f.date_field :effective_date,
+            label: t(".effective_date_label"),
+            value: @policy_version.effective_date || Date.current %>
+      </section>
+
+      <section class="flex items-center gap-3 pt-4 border-t border-alpha-black-50">
+        <%= f.submit t(".submit") %>
+        <%= link_to t(".cancel"), policy_version_path(@policy_version), class: "text-sm text-secondary hover:text-primary transition-colors" %>
+      </section>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+---
+en:
+  top_actions:
+    widget:
+      confidence: "%{percent} confidence"
+      why: "Why?"
+      complete: "Complete"
+      confirm_complete: "Are you sure you want to mark this action as complete?"
+      confirm_dismiss: "Are you sure you want to dismiss this action?"
+    empty:
+      title: "All caught up!"
+      description: "No actions requiring your attention right now."
+    show:
+      priority_badge: "Priority %{priority}"
+      action_type: "Type: %{type}"
+      amount_label: "Amount"
+      account_label: "Account"
+      instrument_label: "Instrument"
+      created_label: "Created"
+      rationale: "Rationale"
+      blockers: "Warnings"
+      actions: "Actions"
+      complete: "Complete Action"
+      dismiss: "Dismiss"
+      confirm_complete: "Are you sure you want to mark this action as complete?"
+      confirm_dismiss: "Are you sure you want to dismiss this action?"

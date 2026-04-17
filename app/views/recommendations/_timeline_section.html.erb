@@ -1,0 +1,18 @@
+<%# locals: (title:, icon:, count: 0) %>
+
+<div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+  <div class="flex items-center justify-between px-4 py-3 border-b border-primary bg-surface">
+    <div class="flex items-center gap-2">
+      <%= icon icon, size: "sm", class: "text-secondary" %>
+      <h2 class="font-medium text-primary text-sm"><%= title %></h2>
+      <% if count > 0 %>
+        <%= render "shared/badge", color: nil do %>
+          <%= count %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <div class="p-2">
+    <%= yield %>
+  </div>
+</div>

@@ -43,6 +43,8 @@ en:
         categories: "Categories"
         value: "Value"
         weight: "Weight"
+      top_action:
+        title: "Top Action"
       investment_summary:
         title: "Investments"
         total_return: "Total Return"

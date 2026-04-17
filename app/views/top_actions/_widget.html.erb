@@ -1,0 +1,100 @@
+<%# locals: (top_action:) %>
+
+<%= turbo_frame_tag dom_id(top_action), class: "w-full" do %>
+  <div class="bg-container rounded-xl shadow-border-xs border-l-4 <%= top_action.priority >= 8 ? 'border-l-error' : top_action.priority >= 5 ? 'border-l-warning' : 'border-l-info' %> overflow-hidden">
+    <div class="p-4 space-y-3">
+      <%# Header: Title and Confidence Badge %>
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <div class="shrink-0 mt-0.5">
+            <%= render DS::FilledIcon.new(
+              variant: :text,
+              text: top_action.title,
+              size: "md",
+              rounded: true
+            ) %>
+          </div>
+          <div class="min-w-0">
+            <h3 class="font-medium text-primary text-sm leading-tight"><%= top_action.title %></h3>
+            <% if top_action.account_name.present? %>
+              <p class="text-secondary text-xs mt-0.5"><%= top_action.account_name %></p>
+            <% end %>
+          </div>
+        </div>
+
+        <% if top_action.confidence.present? %>
+          <%= render "shared/badge", color: top_action.confidence >= 0.8 ? "success" : top_action.confidence >= 0.6 ? "warning" : nil do %>
+            <%= t(".confidence", percent: number_to_percentage(top_action.confidence * 100, precision: 0)) %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%# Action Details %>
+      <% if top_action.amount_cents.present? || top_action.instrument.present? %>
+        <div class="flex items-center gap-4 text-sm">
+          <% if top_action.amount_cents.present? %>
+            <div class="flex items-center gap-1.5">
+              <%= icon "banknote", size: "sm", class: "text-secondary" %>
+              <span class="text-primary font-medium privacy-sensitive"><%= format_money(top_action.amount_money) %></span>
+            </div>
+          <% end %>
+          <% if top_action.instrument.present? %>
+            <div class="flex items-center gap-1.5">
+              <%= icon "bar-chart-3", size: "sm", class: "text-secondary" %>
+              <span class="text-primary"><%= top_action.instrument %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Blocker Warnings %>
+      <% if top_action.blockers.any? %>
+        <div class="space-y-2">
+          <% top_action.blockers.each do |blocker| %>
+            <%= render DS::Alert.new(
+              message: blocker["message"],
+              variant: :warning
+            ) %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Rationale Disclosure %>
+      <% if top_action.rationale.present? %>
+        <%= render DS::Disclosure.new(
+          title: t(".why"),
+          align: :left,
+          open: false
+        ) do %>
+          <div class="text-sm text-secondary px-3 pb-2">
+            <%= simple_format(top_action.rationale) %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <%# Action Buttons %>
+      <div class="flex items-center gap-2 pt-2">
+        <%= button_to complete_top_action_path(top_action),
+              method: :patch,
+              class: "flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors",
+              data: { turbo_confirm: t(".confirm_complete") } do %>
+          <%= icon "check", size: "sm" %>
+          <%= t(".complete") %>
+        <% end %>
+
+        <%= button_to dismiss_top_action_path(top_action),
+              method: :patch,
+              class: "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-secondary text-secondary text-sm font-medium hover:bg-subtle transition-colors",
+              data: { turbo_confirm: t(".confirm_dismiss") } do %>
+          <%= icon "x", size: "sm" %>
+        <% end %>
+
+        <%= link_to top_action_path(top_action),
+              data: { turbo_frame: :drawer },
+              class: "inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-secondary text-secondary text-sm font-medium hover:bg-subtle transition-colors" do %>
+          <%= icon "arrow-right", size: "sm" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

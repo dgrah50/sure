@@ -1,0 +1,95 @@
+<%= render "layouts/shared/page_header", title: t(".title"), subtitle: t(".subtitle") %>
+
+<div class="space-y-6">
+  <%# Today Section %>
+  <%= turbo_frame_tag "recommendations_today" do %>
+    <% if @recommendations_today&.any? %>
+      <%= render "timeline_section",
+            title: t(".today"),
+            icon: "calendar",
+            count: @recommendations_today.count do %>
+        <div class="space-y-2">
+          <%= render partial: "recommendation",
+                collection: @recommendations_today,
+                as: :recommendation %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# This Week Section %>
+  <%= turbo_frame_tag "recommendations_this_week" do %>
+    <% if @recommendations_this_week&.any? %>
+      <%= render "timeline_section",
+            title: t(".this_week"),
+            icon: "calendar-days",
+            count: @recommendations_this_week.count do %>
+        <div class="space-y-2">
+          <%= render partial: "recommendation",
+                collection: @recommendations_this_week,
+                as: :recommendation %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# This Month Section %>
+  <%= turbo_frame_tag "recommendations_this_month" do %>
+    <% if @recommendations_this_month&.any? %>
+      <%= render "timeline_section",
+            title: t(".this_month"),
+            icon: "calendar-range",
+            count: @recommendations_this_month.count do %>
+        <div class="space-y-2">
+          <%= render partial: "recommendation",
+                collection: @recommendations_this_month,
+                as: :recommendation %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# Future Events Section %>
+  <%= turbo_frame_tag "recommendations_future" do %>
+    <% if @recommendations_future&.any? %>
+      <%= render "timeline_section",
+            title: t(".future"),
+            icon: "calendar-clock",
+            count: @recommendations_future.count do %>
+        <div class="space-y-2">
+          <%= render partial: "recommendation",
+                collection: @recommendations_future,
+                as: :recommendation %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# Completed Section %>
+  <%= turbo_frame_tag "recommendations_completed" do %>
+    <% if @recommendations_completed&.any? %>
+      <%= render DS::Disclosure.new(
+        title: t(".completed_count", count: @recommendations_completed.count),
+        align: :left,
+        open: false
+      ) do %>
+        <div class="space-y-2 mt-2">
+          <%= render partial: "recommendation",
+                collection: @recommendations_completed,
+                as: :recommendation %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# Empty State %>
+  <% if [@recommendations_today, @recommendations_this_week, @recommendations_this_month, @recommendations_future].all?(&:blank?) %>
+    <div class="bg-container rounded-xl shadow-border-xs p-8 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
+        <%= icon "lightbulb", size: "xl", class: "text-secondary" %>
+      </div>
+      <h3 class="font-medium text-primary text-lg"><%= t(".empty_title") %></h3>
+      <p class="text-secondary text-sm mt-2 max-w-sm mx-auto"><%= t(".empty_description") %></p>
+    </div>
+  <% end %>
+</div>
