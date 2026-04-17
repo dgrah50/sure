@@ -54,9 +54,12 @@ class SnaptradeAccount::HoldingsProcessor
       raw_symbol_data = symbol_wrapper["symbol"] || symbol_wrapper[:symbol] || {}
       symbol_data = raw_symbol_data.is_a?(Hash) ? raw_symbol_data.with_indifferent_access : {}
 
+<<<<<<< HEAD
       # Get the ticker - it's at symbol.symbol.symbol
       ticker = symbol_data["symbol"] || symbol_data[:symbol]
 
+=======
+>>>>>>> finos
       # If that's still a hash, we need to go deeper or use raw_symbol
       if ticker.is_a?(Hash)
         ticker = symbol_data["raw_symbol"] || symbol_data[:raw_symbol]
@@ -78,7 +81,10 @@ class SnaptradeAccount::HoldingsProcessor
       # Calculate amount
       amount = quantity * price
 
+<<<<<<< HEAD
       # Get the holding date (use current date if not provided)
+=======
+>>>>>>> finos
       holding_date = Date.current
 
       # Extract currency - it can be at the holding level or in symbol_data

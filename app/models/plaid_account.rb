@@ -5,8 +5,12 @@ class PlaidAccount < ApplicationRecord
   if encryption_ready?
     encrypts :raw_payload
     encrypts :raw_transactions_payload
+<<<<<<< HEAD
     # Support reading data encrypted under the old column name after rename
     encrypts :raw_holdings_payload, previous: { attribute: :raw_investments_payload }
+=======
+    encrypts :raw_holdings_payload
+>>>>>>> finos
     encrypts :raw_liabilities_payload
   end
 

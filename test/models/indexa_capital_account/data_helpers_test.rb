@@ -15,9 +15,15 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     @helper = TestHelper.new
   end
 
+<<<<<<< HEAD
   # ==========================================================================
   # parse_decimal tests
   # ==========================================================================
+=======
+
+  # parse_decimal tests
+
+>>>>>>> finos
 
   test "parse_decimal returns nil for nil input" do
     assert_nil @helper.parse_decimal(nil)
@@ -51,9 +57,15 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_nil @helper.parse_decimal("not a number")
   end
 
+<<<<<<< HEAD
   # ==========================================================================
   # parse_date tests
   # ==========================================================================
+=======
+
+  # parse_date tests
+
+>>>>>>> finos
 
   test "parse_date returns nil for nil input" do
     assert_nil @helper.parse_date(nil)
@@ -88,9 +100,15 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_nil @helper.parse_date("not a date")
   end
 
+<<<<<<< HEAD
   # ==========================================================================
   # extract_currency tests
   # ==========================================================================
+=======
+
+  # extract_currency tests
+
+>>>>>>> finos
 
   test "extract_currency returns fallback for nil currency" do
     result = @helper.extract_currency({}, fallback: "USD")
@@ -112,9 +130,15 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_equal "GBP", result
   end
 
+<<<<<<< HEAD
   # ==========================================================================
   # resolve_security tests (investment providers only)
   # ==========================================================================
+=======
+
+  # resolve_security tests (investment providers only)
+
+>>>>>>> finos
 
   test "resolve_security returns nil for blank ticker" do
     assert_nil @helper.resolve_security("")
@@ -154,9 +178,15 @@ class IndexaCapitalAccount::DataHelpersTest < ActiveSupport::TestCase
     assert_equal "XYZ1", result.name
   end
 
+<<<<<<< HEAD
   # ==========================================================================
   # extract_security_name tests (investment providers only)
   # ==========================================================================
+=======
+
+  # extract_security_name tests (investment providers only)
+
+>>>>>>> finos
 
   test "extract_security_name uses name field" do
     result = @helper.extract_security_name({ name: "Apple Inc" }, "AAPL")

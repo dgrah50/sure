@@ -9,9 +9,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     skip "Encryption not configured" unless User.encryption_ready?
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # USER MODEL TESTS
   # ============================================================================
+=======
+
+  # USER MODEL TESTS
+
+>>>>>>> finos
 
   test "user email is encrypted and can be looked up" do
     user = User.create!(
@@ -99,9 +105,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     user.update!(unconfirmed_email: nil)
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # INVITATION MODEL TESTS
   # ============================================================================
+=======
+
+  # INVITATION MODEL TESTS
+
+>>>>>>> finos
 
   test "invitation token is encrypted and lookups work" do
     invitation = Invitation.create!(
@@ -142,9 +154,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     invitation1.destroy
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # INVITE CODE MODEL TESTS
   # ============================================================================
+=======
+
+  # INVITE CODE MODEL TESTS
+
+>>>>>>> finos
 
   test "invite code token is encrypted and claim works" do
     token = InviteCode.generate!
@@ -170,9 +188,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     invite_code.destroy
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # SESSION MODEL TESTS
   # ============================================================================
+=======
+
+  # SESSION MODEL TESTS
+
+>>>>>>> finos
 
   test "session user_agent is encrypted" do
     Current.user_agent = "Mozilla/5.0 Test Browser"
@@ -199,9 +223,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     end
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # MOBILE DEVICE MODEL TESTS
   # ============================================================================
+=======
+
+  # MOBILE DEVICE MODEL TESTS
+
+>>>>>>> finos
 
   test "mobile device device_id is encrypted and uniqueness works" do
     device = MobileDevice.create!(
@@ -236,9 +266,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     device.destroy
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # PROVIDER ITEM TESTS (if fixtures exist)
   # ============================================================================
+=======
+
+  # PROVIDER ITEM TESTS (if fixtures exist)
+
+>>>>>>> finos
 
   test "lunchflow item credentials and payloads are encrypted" do
     skip "No lunchflow items in fixtures" unless LunchflowItem.any?
@@ -280,9 +316,15 @@ class EncryptionVerificationTest < ActiveSupport::TestCase
     account.update!(raw_payload: original_payload)
   end
 
+<<<<<<< HEAD
   # ============================================================================
   # DATABASE VERIFICATION TESTS
   # ============================================================================
+=======
+
+  # DATABASE VERIFICATION TESTS
+
+>>>>>>> finos
 
   test "encrypted fields are not stored as plaintext in database" do
     user = User.create!(

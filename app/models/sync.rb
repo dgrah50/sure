@@ -72,12 +72,18 @@ class Sync < ApplicationRecord
     (end_time - start_time).to_f
   end
 
+<<<<<<< HEAD
   # Get the start time for duration calculation
+=======
+>>>>>>> finos
   def start_time
     syncing_at || pending_at
   end
 
+<<<<<<< HEAD
   # Get the end time for duration calculation
+=======
+>>>>>>> finos
   def end_time
     completed_at || failed_at || (stale? ? updated_at : nil)
   end
@@ -119,8 +125,11 @@ class Sync < ApplicationRecord
     end
   end
 
+<<<<<<< HEAD
   # Check if this sync represents a healthy state
   # Returns true if the sync completed successfully and the syncable has synced recently
+=======
+>>>>>>> finos
   def healthy?
     return false unless completed?
 
@@ -133,7 +142,10 @@ class Sync < ApplicationRecord
     end
   end
 
+<<<<<<< HEAD
   # Update the status text for user feedback
+=======
+>>>>>>> finos
   def update_status_text(text)
     update(status_text: text) if text.present?
   end

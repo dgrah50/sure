@@ -1,6 +1,7 @@
 class SimplefinItem < ApplicationRecord
   include Syncable, Provided, Encryptable
   include SimplefinItem::Unlinking
+<<<<<<< HEAD
 
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
   enum :sync_health_status, { healthy: "healthy", warning: "warning", critical: "critical" }, prefix: true
@@ -9,6 +10,11 @@ class SimplefinItem < ApplicationRecord
   HEALTHY_SYNC_THRESHOLD = 24.hours
   WARNING_SYNC_THRESHOLD = 3.days
   CRITICAL_SYNC_THRESHOLD = 7.days
+=======
+  include SyncHealthTrackable
+
+  enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+>>>>>>> finos
 
   # Virtual attribute for the setup token form field
   attr_accessor :setup_token
@@ -405,6 +411,7 @@ class SimplefinItem < ApplicationRecord
     { stale: false }
   end
 
+<<<<<<< HEAD
   # Calculate sync health status based on last successful sync timestamp
   # Returns :healthy, :warning, or :critical
   def calculate_sync_health_status
@@ -479,12 +486,17 @@ class SimplefinItem < ApplicationRecord
     self.class.error_category(error_message || syncs.failed.first&.error)
   end
 
+=======
+>>>>>>> finos
   # Check if the SimpleFin connection needs user attention
   def needs_attention?
     requires_update? || stale_sync_status[:stale] || pending_account_setup?
   end
 
+<<<<<<< HEAD
   # Get a summary of issues requiring attention
+=======
+>>>>>>> finos
   def attention_summary
     issues = []
     issues << "Connection needs update" if requires_update?
@@ -514,7 +526,10 @@ class SimplefinItem < ApplicationRecord
   # Count stale pending transactions (>8 days old) across all linked accounts
   # Returns { count: N, accounts: [names] } or { count: 0 } if none
   def stale_pending_status(days: 8)
+<<<<<<< HEAD
     # Get all accounts linked to this SimpleFIN item
+=======
+>>>>>>> finos
     # Eager-load both association paths to avoid N+1 on current_account method
     linked_accounts = simplefin_accounts.includes(:account, :linked_account).filter_map(&:current_account)
     return { count: 0 } if linked_accounts.empty?

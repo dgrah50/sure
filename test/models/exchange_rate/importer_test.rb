@@ -274,7 +274,11 @@ class ExchangeRate::ImporterTest < ActiveSupport::TestCase
     assert_equal 0, ExchangeRate.count, "No rates should be imported on rate limit error"
   end
 
+<<<<<<< HEAD
   # === Clamping tests (Phase 2) ===
+=======
+
+>>>>>>> finos
 
   test "advances gapfill start when pair predates provider history" do
     ExchangeRate.delete_all

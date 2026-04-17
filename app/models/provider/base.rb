@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Base class for all provider adapters
 # Provides common interface for working with different third-party data providers
 #
@@ -17,6 +18,9 @@
 #       "acme"
 #     end
 #   end
+=======
+# Base class for all provider adapters. Subclasses must implement #provider_name.
+>>>>>>> finos
 class Provider::Base
   attr_reader :provider_account, :account
 
@@ -25,8 +29,11 @@ class Provider::Base
     @account = account || provider_account.account
   end
 
+<<<<<<< HEAD
   # Provider identification - must be implemented by subclasses
   # @return [String] The provider name (e.g., "plaid", "simplefin")
+=======
+>>>>>>> finos
   def provider_name
     raise NotImplementedError, "#{self.class} must implement #provider_name"
   end
@@ -52,8 +59,11 @@ class Provider::Base
     []
   end
 
+<<<<<<< HEAD
   # Returns the provider type (class name)
   # @return [String] The provider account class name
+=======
+>>>>>>> finos
   def provider_type
     provider_account.class.name
   end

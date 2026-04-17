@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Shared concern for providers that need interval-based request throttling
 # and a standard error transformation pattern.
 #
@@ -14,6 +15,10 @@
 # And MAY define a `PROVIDER_ENV_PREFIX` constant (e.g. "ALPHA_VANTAGE") used
 # to derive the ENV key for the min request interval override.  When omitted
 # the prefix is derived from the class name (Provider::AlphaVantage → "ALPHA_VANTAGE").
+=======
+# Shared concern for interval-based request throttling and error transformation.
+# The including class MUST define MIN_REQUEST_INTERVAL, Error, and RateLimitError constants.
+>>>>>>> finos
 module Provider::RateLimitable
   extend ActiveSupport::Concern
 

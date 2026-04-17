@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Module for providers to declare their configuration requirements
 #
 # Providers can declare their own configuration fields without needing to modify
@@ -47,6 +48,10 @@
 #
 # Fields are stored with keys like "plaid_client_id", "plaid_secret", etc.
 # Access values via: configuration.get_value(:client_id) or field.value
+=======
+# Module for providers to declare their configuration requirements.
+# Fields are stored with keys like "plaid_client_id" and accessed via configuration.get_value(:field_name).
+>>>>>>> finos
 module Provider::Configurable
   extend ActiveSupport::Concern
 
@@ -58,7 +63,10 @@ module Provider::Configurable
       Provider::ConfigurationRegistry.register(provider_key, @configuration, self)
     end
 
+<<<<<<< HEAD
     # Get the configuration for this provider
+=======
+>>>>>>> finos
     def configuration
       @configuration || Provider::ConfigurationRegistry.get(provider_key)
     end
@@ -69,7 +77,10 @@ module Provider::Configurable
       name.demodulize.gsub(/Adapter$/, "").underscore
     end
 
+<<<<<<< HEAD
     # Get a configuration value
+=======
+>>>>>>> finos
     def config_value(field_name)
       configuration&.get_value(field_name)
     end
@@ -116,8 +127,11 @@ module Provider::Configurable
       @configured_check = nil
     end
 
+<<<<<<< HEAD
     # Set the provider-level description (markdown supported)
     # @param text [String] The description text for this provider
+=======
+>>>>>>> finos
     def description(text)
       @provider_description = text
     end
@@ -199,13 +213,19 @@ module Provider::Configurable
       @provider_key = provider_key
     end
 
+<<<<<<< HEAD
     # Get the setting key for this field
     # Example: plaid_client_id
+=======
+>>>>>>> finos
     def setting_key
       "#{provider_key}_#{name}".to_sym
     end
 
+<<<<<<< HEAD
     # Get the value for this field (Setting -> ENV -> default)
+=======
+>>>>>>> finos
     def value
       # First try Setting using dynamic bracket-style access
       # Each field is stored as an individual entry without explicit field declarations
@@ -233,8 +253,11 @@ module Provider::Configurable
       validate.empty?
     end
 
+<<<<<<< HEAD
     # Get validation errors for the current value
     # Returns an array of error messages
+=======
+>>>>>>> finos
     def validate
       errors = []
       current_value = value
@@ -290,7 +313,10 @@ module Provider::ConfigurationRegistry
       registry.keys
     end
 
+<<<<<<< HEAD
     # Get the adapter class for a provider key
+=======
+>>>>>>> finos
     def get_adapter_class(provider_key)
       adapter_registry[provider_key]
     end

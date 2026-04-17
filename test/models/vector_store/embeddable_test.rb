@@ -11,7 +11,11 @@ class VectorStore::EmbeddableTest < ActiveSupport::TestCase
     @host = EmbeddableHost.new
   end
 
+<<<<<<< HEAD
   # --- extract_text ---
+=======
+
+>>>>>>> finos
 
   test "extract_text returns plain text for .txt files" do
     result = @host.extract_text("Hello world", "notes.txt")
@@ -54,7 +58,11 @@ class VectorStore::EmbeddableTest < ActiveSupport::TestCase
     assert_nil result
   end
 
+<<<<<<< HEAD
   # --- chunk_text ---
+=======
+
+>>>>>>> finos
 
   test "chunk_text returns empty array for blank text" do
     assert_equal [], @host.chunk_text("")
@@ -112,7 +120,11 @@ class VectorStore::EmbeddableTest < ActiveSupport::TestCase
     end
   end
 
+<<<<<<< HEAD
   # --- embed ---
+=======
+
+>>>>>>> finos
 
   test "embed calls embedding endpoint and returns vector" do
     expected_vector = [ 0.1, 0.2, 0.3 ]
@@ -138,7 +150,11 @@ class VectorStore::EmbeddableTest < ActiveSupport::TestCase
     assert_raises(VectorStore::Error) { @host.embed("test text") }
   end
 
+<<<<<<< HEAD
   # --- embed_batch ---
+=======
+
+>>>>>>> finos
 
   test "embed_batch processes texts and returns ordered vectors" do
     texts = [ "first", "second", "third" ]

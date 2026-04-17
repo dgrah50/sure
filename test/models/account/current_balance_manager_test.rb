@@ -13,11 +13,19 @@ class Account::CurrentBalanceManagerTest < ActiveSupport::TestCase
     )
   end
 
+<<<<<<< HEAD
   # -------------------------------------------------------------------------------------------------
   # Manual account current balance management
   #
   # Manual accounts do not manage `current_anchor` valuations and have "auto-update strategies" to set the current balance.
   # -------------------------------------------------------------------------------------------------
+=======
+
+  # Manual account current balance management
+  #
+  # Manual accounts do not manage `current_anchor` valuations and have "auto-update strategies" to set the current balance.
+
+>>>>>>> finos
 
   test "when one or more reconciliations exist, append new reconciliation to represent the current balance" do
     account = @family.accounts.create!(
@@ -175,13 +183,21 @@ class Account::CurrentBalanceManagerTest < ActiveSupport::TestCase
     assert_equal 1000, account.balance
   end
 
+<<<<<<< HEAD
   # -------------------------------------------------------------------------------------------------
+=======
+
+>>>>>>> finos
   # Linked account current balance management
   #
   # Linked accounts manage "current balance" via the special `current_anchor` valuation.
   # This is NOT a user-facing feature, and is primarily used in "processors" while syncing
   # linked account data (e.g. via Plaid)
+<<<<<<< HEAD
   # -------------------------------------------------------------------------------------------------
+=======
+
+>>>>>>> finos
 
   test "when no existing anchor for linked account, creates new anchor" do
     manager = Account::CurrentBalanceManager.new(@linked_account)

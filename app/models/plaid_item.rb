@@ -1,5 +1,6 @@
 class PlaidItem < ApplicationRecord
   include Syncable, Provided, Encryptable
+<<<<<<< HEAD
 
   enum :plaid_region, { us: "us", eu: "eu" }
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
@@ -8,6 +9,12 @@ class PlaidItem < ApplicationRecord
   # Health thresholds
   HEALTHY_SYNC_THRESHOLD = 24.hours
   WARNING_SYNC_THRESHOLD = 3.days
+=======
+  include SyncHealthTrackable
+
+  enum :plaid_region, { us: "us", eu: "eu" }
+  enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+>>>>>>> finos
 
   # Encrypt sensitive credentials and raw payloads if ActiveRecord encryption is configured
   if encryption_ready?
@@ -113,6 +120,7 @@ class PlaidItem < ApplicationRecord
     save!
   end
 
+<<<<<<< HEAD
   # Calculate sync health status based on last successful sync timestamp
   # Returns :healthy, :warning, or :critical
   def calculate_sync_health_status
@@ -184,6 +192,8 @@ class PlaidItem < ApplicationRecord
     self.class.error_category(error_message || syncs.failed.first&.error)
   end
 
+=======
+>>>>>>> finos
   def supports_product?(product)
     supported_products.include?(product)
   end

@@ -1,21 +1,39 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Connects to data-controller="polling"
-// Automatically refreshes a turbo frame at a specified interval
+/**
+ * Connects to data-controller="polling"
+ * Automatically refreshes a turbo frame at a specified interval
+ */
 export default class extends Controller {
+  /** @type {Object.<string, any>} */
   static values = {
     url: String,
     interval: { type: Number, default: 3000 },
   };
 
+  /** @type {number|null} */
+  poll = null;
+
+  /**
+   * Start polling when controller connects
+   * @returns {void}
+   */
   connect() {
     this.startPolling();
   }
 
+  /**
+   * Stop polling when controller disconnects
+   * @returns {void}
+   */
   disconnect() {
     this.stopPolling();
   }
 
+  /**
+   * Start the polling interval
+   * @returns {void}
+   */
   startPolling() {
     if (!this.hasUrlValue) return;
 
@@ -24,6 +42,10 @@ export default class extends Controller {
     }, this.intervalValue);
   }
 
+  /**
+   * Stop the polling interval
+   * @returns {void}
+   */
   stopPolling() {
     if (this.poll) {
       clearInterval(this.poll);
@@ -31,6 +53,10 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Fetch fresh content from the server and update the frame
+   * @returns {Promise<void>}
+   */
   async refresh() {
     try {
       const response = await fetch(this.urlValue, {

@@ -34,7 +34,6 @@ class Eval::Sample < ApplicationRecord
     context_data.dig("mock_data") || input_data.dig("mock_data") || {}
   end
 
-  # Get the chat prompt (for chat evals)
   def chat_prompt
     input_data.dig("prompt") || input_data["prompt"]
   end

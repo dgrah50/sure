@@ -1,4 +1,5 @@
 class SnaptradeItem < ApplicationRecord
+<<<<<<< HEAD
   include Syncable, Provided, Unlinking
 
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
@@ -12,6 +13,12 @@ class SnaptradeItem < ApplicationRecord
     creds_ready || env_ready
   end
 
+=======
+  include Syncable, Provided, Unlinking, EncryptableItem
+
+  enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+
+>>>>>>> finos
   # Encrypt sensitive credentials if ActiveRecord encryption is configured
   # client_id/consumer_key use deterministic encryption (may need querying)
   # snaptrade_user_secret uses non-deterministic (more secure for pure secrets)
@@ -190,7 +197,10 @@ class SnaptradeItem < ApplicationRecord
     snaptrade_accounts.joins(:account_provider)
   end
 
+<<<<<<< HEAD
   # Get all Sure accounts linked to this SnapTrade item
+=======
+>>>>>>> finos
   def accounts
     snaptrade_accounts
       .includes(account_provider: :account)

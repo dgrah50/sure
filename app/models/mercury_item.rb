@@ -1,4 +1,5 @@
 class MercuryItem < ApplicationRecord
+<<<<<<< HEAD
   include Syncable, Provided, Unlinking
 
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
@@ -12,6 +13,12 @@ class MercuryItem < ApplicationRecord
     creds_ready || env_ready
   end
 
+=======
+  include Syncable, Provided, Unlinking, EncryptableItem
+
+  enum :status, { good: "good", requires_update: "requires_update" }, default: :good
+
+>>>>>>> finos
   # Encrypt sensitive credentials if ActiveRecord encryption is configured
   if encryption_ready?
     encrypts :token, deterministic: true

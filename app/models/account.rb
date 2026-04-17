@@ -142,7 +142,6 @@ class Account < ApplicationRecord
         raise ArgumentError, "account_type is required when creating an account from SimpleFIN"
       end
 
-      # Get the balance from SimpleFin
       balance = simplefin_account.current_balance || simplefin_account.available_balance || 0
 
       # SimpleFin returns negative balances for credit cards (liabilities)
@@ -185,9 +184,6 @@ class Account < ApplicationRecord
     end
 
     def create_from_enable_banking_account(enable_banking_account, account_type, subtype = nil)
-      # Get the balance from Enable Banking
-      balance = enable_banking_account.current_balance || 0
-
       # Enable Banking may return negative balances for liabilities
       # Sure expects positive balances for liabilities
       if account_type == "CreditCard" || account_type == "Loan"

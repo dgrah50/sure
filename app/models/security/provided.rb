@@ -158,12 +158,15 @@ module Security::Provided
       end
   end
 
+<<<<<<< HEAD
   # Public method: resolves the provider for this specific security.
   # Uses the security's assigned price_provider if available and configured.
   # Falls back to the first enabled provider only when no specific provider
   # was ever assigned. When an assigned provider becomes unavailable, returns
   # nil so the security is skipped rather than queried against an incompatible
   # provider (e.g. MFAPI scheme codes sent to TwelveData).
+=======
+>>>>>>> finos
   def price_data_provider
     if price_provider.present?
       assigned = self.class.provider_for(price_provider)

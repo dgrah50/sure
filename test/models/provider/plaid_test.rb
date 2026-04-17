@@ -9,7 +9,11 @@ class Provider::PlaidTest < ActiveSupport::TestCase
       "PLAID_CLIENT_ID" => "foo",
       "PLAID_SECRET" => "bar"
     ) do
+<<<<<<< HEAD
       Provider::PlaidAdapter.reload_configuration
+=======
+      Provider::PlaidConfiguration.reload_configuration
+>>>>>>> finos
     end
 
     # A specialization of Plaid client with sandbox-only extensions
@@ -17,7 +21,11 @@ class Provider::PlaidTest < ActiveSupport::TestCase
   end
 
   teardown do
+<<<<<<< HEAD
     Provider::PlaidAdapter.reload_configuration
+=======
+    Provider::PlaidConfiguration.reload_configuration
+>>>>>>> finos
   end
 
   test "gets link token" do

@@ -27,7 +27,11 @@ class SnaptradeDataHelpersTest < ActiveSupport::TestCase
     @helper = TestHelper.new
   end
 
+<<<<<<< HEAD
   # === parse_decimal tests ===
+=======
+
+>>>>>>> finos
 
   test "parse_decimal handles BigDecimal" do
     result = @helper.test_parse_decimal(BigDecimal("123.45"))
@@ -59,7 +63,11 @@ class SnaptradeDataHelpersTest < ActiveSupport::TestCase
     assert_nil result
   end
 
+<<<<<<< HEAD
   # === parse_date tests ===
+=======
+
+>>>>>>> finos
 
   test "parse_date handles Date object" do
     date = Date.new(2024, 6, 15)
@@ -99,7 +107,11 @@ class SnaptradeDataHelpersTest < ActiveSupport::TestCase
     assert_nil result
   end
 
+<<<<<<< HEAD
   # === resolve_security tests ===
+=======
+
+>>>>>>> finos
 
   test "resolve_security finds existing security by ticker" do
     existing = Security.create!(ticker: "TEST", name: "Test Company")
@@ -146,7 +158,11 @@ class SnaptradeDataHelpersTest < ActiveSupport::TestCase
     assert_equal "RACECOND", result.ticker
   end
 
+<<<<<<< HEAD
   # === extract_currency tests ===
+=======
+
+>>>>>>> finos
 
   test "extract_currency handles hash with code key (symbol access)" do
     data = { currency: { code: "CAD" } }

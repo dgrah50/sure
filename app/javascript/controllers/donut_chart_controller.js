@@ -1,9 +1,44 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 
-// Connects to data-controller="donut-chart"
+/**
+ * @typedef {Object} DonutSegment
+ * @property {string} id - Unique segment identifier.
+ * @property {number} amount - Segment value amount.
+ * @property {string} color - Segment color.
+ * @property {string} [name] - Optional display name.
+ */
+
+/**
+ * Controller for rendering a D3 donut/pie chart.
+ *
+ * This controller creates an interactive SVG donut chart with hover effects,
+ * segment highlighting, and optional click navigation. It supports extended
+ * hover areas and configurable segment styling.
+ *
+ * @extends Controller
+ */
 export default class extends Controller {
+  /**
+   * Static targets for the controller.
+   * @type {string[]}
+   */
   static targets = ["chartContainer", "contentContainer", "defaultContent"];
+
+  /**
+   * Static values for the controller.
+   * @type {Object}
+   * @property {Object} segments - Array of donut segments.
+   * @property {string} unusedSegmentId - ID for unused segments.
+   * @property {string} overageSegmentId - ID for overage segments.
+   * @property {number} segmentHeight - Height of each segment ring.
+   * @property {number} segmentOpacity - Opacity of segment colors.
+   * @property {boolean} extendedHover - Whether to extend hover area.
+   * @property {number} hoverExtension - Pixel extension for hover area.
+   * @property {boolean} enableClick - Whether clicks are enabled.
+   * @property {string} startDate - Start date for click navigation.
+   * @property {string} endDate - End date for click navigation.
+   */
   static values = {
     segments: { type: Array, default: [] },
     unusedSegmentId: { type: String, default: "unused" },
@@ -17,23 +52,42 @@ export default class extends Controller {
     endDate: String,
   };
 
+  /** @type {number} */
   #viewBoxSize = 100;
+  /** @type {number} */
   #minSegmentAngle = 0.02; // Minimum angle in radians (~1.15 degrees)
+  /** @type {number} */
   #padAngle = 0.005; // Spacing between segments (~0.29 degrees)
+  /** @type {import("d3").Selection<SVGPathElement, unknown, null, undefined>|null} */
   #visiblePaths = null;
 
+  /**
+   * Called when the controller is connected to the DOM.
+   * Initializes the chart and sets up event listeners.
+   * @returns {void}
+   */
   connect() {
     this.#draw();
     document.addEventListener("turbo:load", this.#redraw);
     this.element.addEventListener("mouseleave", this.#clearSegmentHover);
   }
 
+  /**
+   * Called when the controller is disconnected from the DOM.
+   * Cleans up event listeners and chart elements.
+   * @returns {void}
+   */
   disconnect() {
     this.#teardown();
     document.removeEventListener("turbo:load", this.#redraw);
     this.element.removeEventListener("mouseleave", this.#clearSegmentHover);
   }
 
+  /**
+   * Gets processed segment data with minimum angles and sorting.
+   * @returns {Array<DonutSegment & {amount: number}>} Processed segment data.
+   * @private
+   */
   get #data() {
     const totalPieValue = this.segmentsValue.reduce(
       (acc, s) => acc + Number(s.amount),
@@ -59,11 +113,21 @@ export default class extends Controller {
       });
   }
 
+  /**
+   * Redraws the chart (teardown + draw).
+   * @returns {void}
+   * @private
+   */
   #redraw = () => {
     this.#teardown();
     this.#draw();
   };
 
+  /**
+   * Cleans up D3 elements and resets state.
+   * @returns {void}
+   * @private
+   */
   #teardown() {
     if (this.hasChartContainerTarget) {
       d3.select(this.chartContainerTarget).selectAll("*").remove();
@@ -71,6 +135,11 @@ export default class extends Controller {
     this.#visiblePaths = null;
   }
 
+  /**
+   * Draws the donut chart.
+   * @returns {void}
+   * @private
+   */
   #draw() {
     if (!this.hasChartContainerTarget) return;
 
@@ -161,6 +230,12 @@ export default class extends Controller {
       });
   }
 
+  /**
+   * Transforms segment color with opacity for non-special segments.
+   * @param {import("d3").DefaultArcObject & {data: DonutSegment}} param - Pie arc data.
+   * @returns {string} The transformed color.
+   * @private
+   */
   #transformRingColor = ({ data: { id, color } }) => {
     if (id === this.unusedSegmentIdValue || id === this.overageSegmentIdValue) {
       return color;
@@ -171,7 +246,12 @@ export default class extends Controller {
     return reducedOpacityColor;
   };
 
-  // Highlights segment and shows segment specific content (all other segments are grayed out)
+  /**
+   * Highlights segment and shows segment specific content.
+   * @param {MouseEvent} event - The mouse event.
+   * @returns {void}
+   * @private
+   */
   #handleSegmentHover(event) {
     const segmentId = event.target.dataset.segmentId;
     const template = this.element.querySelector(`#segment_${segmentId}`);
@@ -198,7 +278,11 @@ export default class extends Controller {
     template.classList.remove("hidden");
   }
 
-  // Restores original segment colors and hides segment specific content
+  /**
+   * Restores original segment colors and hides segment specific content.
+   * @returns {void}
+   * @private
+   */
   #clearSegmentHover = () => {
     this.defaultContentTarget.classList.remove("hidden");
 
@@ -218,7 +302,12 @@ export default class extends Controller {
     }
   };
 
-  // Handles click on segment (optional, controlled by enableClick value)
+  /**
+   * Handles click on segment for navigation.
+   * @param {DonutSegment} segment - The clicked segment.
+   * @returns {void}
+   * @private
+   */
   #handleClick(segment) {
     if (!segment.name || !this.startDateValue || !this.endDateValue) return;
 
@@ -230,7 +319,11 @@ export default class extends Controller {
     window.location.href = url;
   }
 
-  // Public methods for external highlighting (e.g., from category list hover)
+  /**
+   * Public method to highlight a segment from external triggers.
+   * @param {MouseEvent} event - The mouse event with category ID.
+   * @returns {void}
+   */
   highlightSegment(event) {
     const segmentId = event.currentTarget.dataset.categoryId;
 
@@ -242,6 +335,10 @@ export default class extends Controller {
     });
   }
 
+  /**
+   * Public method to remove segment highlighting.
+   * @returns {void}
+   */
   unhighlightSegment() {
     // Use cached selection if available for better performance
     const paths = this.#visiblePaths || d3.select(this.chartContainerTarget).selectAll("path.visible-path");

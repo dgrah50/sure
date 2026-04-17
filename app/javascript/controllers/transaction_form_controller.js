@@ -1,13 +1,28 @@
 import ExchangeRateFormController from "controllers/exchange_rate_form_controller";
 
-// Connects to data-controller="transaction-form"
+/**
+ * @typedef {Object} TransactionExchangeRateContext
+ * @property {string} fromCurrency - The transaction currency
+ * @property {string} toCurrency - The account currency
+ * @property {string} date - The transaction date
+ */
+
+/**
+ * Connects to data-controller="transaction-form"
+ * Extends ExchangeRateFormController for transaction-specific exchange rate handling
+ */
 export default class extends ExchangeRateFormController {
+  /** @type {string[]} */
   static targets = [
     ...ExchangeRateFormController.targets,
     "account",
     "currency"
   ];
 
+  /**
+   * Check if all required targets for exchange rate functionality are present
+   * @returns {boolean}
+   */
   hasRequiredExchangeRateTargets() {
     if (!this.hasAccountTarget || !this.hasCurrencyTarget || !this.hasDateTarget) {
       return false;
@@ -16,6 +31,10 @@ export default class extends ExchangeRateFormController {
     return true;
   }
 
+  /**
+   * Get the exchange rate context from transaction form inputs
+   * @returns {TransactionExchangeRateContext|null} The exchange rate context or null if not available
+   */
   getExchangeRateContext() {
     if (!this.hasRequiredExchangeRateTargets()) {
       return null;
@@ -41,6 +60,13 @@ export default class extends ExchangeRateFormController {
     };
   }
 
+  /**
+   * Check if the current exchange rate state matches the given parameters
+   * @param {string} fromCurrency - The source currency to check
+   * @param {string} toCurrency - The target currency to check
+   * @param {string} date - The date to check
+   * @returns {boolean}
+   */
   isCurrentExchangeRateState(fromCurrency, toCurrency, date) {
     if (!this.hasRequiredExchangeRateTargets()) {
       return false;
@@ -54,6 +80,10 @@ export default class extends ExchangeRateFormController {
     return fromCurrency === currentCurrency && toCurrency === currentAccountCurrency && date === currentDate;
   }
 
+  /**
+   * Handle currency change events
+   * @returns {void}
+   */
   onCurrencyChange() {
     this.checkCurrencyDifference();
   }

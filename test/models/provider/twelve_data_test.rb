@@ -5,9 +5,15 @@ class Provider::TwelveDataTest < ActiveSupport::TestCase
     @provider = Provider::TwelveData.new("test_api_key")
   end
 
+<<<<<<< HEAD
   # ================================
   #     Rate Limit Detection Tests
   # ================================
+=======
+
+  #     Rate Limit Detection Tests
+
+>>>>>>> finos
 
   test "detects rate limit from JSON body code 429" do
     rate_limit_body = {
@@ -69,9 +75,15 @@ class Provider::TwelveDataTest < ActiveSupport::TestCase
     assert_instance_of Provider::TwelveData::RateLimitError, result.error
   end
 
+<<<<<<< HEAD
   # ================================
   #   Error Transformer Tests
   # ================================
+=======
+
+  #   Error Transformer Tests
+
+>>>>>>> finos
 
   test "default_error_transformer preserves RateLimitError" do
     error = Provider::TwelveData::RateLimitError.new("Rate limit exceeded")
@@ -100,9 +112,15 @@ class Provider::TwelveDataTest < ActiveSupport::TestCase
     assert_instance_of Provider::TwelveData::Error, result.error
   end
 
+<<<<<<< HEAD
   # ================================
   #     Crypto Filter Tests
   # ================================
+=======
+
+  #     Crypto Filter Tests
+
+>>>>>>> finos
 
   test "search_securities excludes Digital Currency rows" do
     body = {
@@ -171,9 +189,15 @@ class Provider::TwelveDataTest < ActiveSupport::TestCase
     assert_empty result.data
   end
 
+<<<<<<< HEAD
   # ================================
   #       Throttle Tests
   # ================================
+=======
+
+  #       Throttle Tests
+
+>>>>>>> finos
 
   test "throttle_request enforces minimum interval between calls" do
     @provider.send(:instance_variable_set, :@last_request_time, Time.current)

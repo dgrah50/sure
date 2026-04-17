@@ -57,10 +57,13 @@ class Provider::TwelveData < Provider
     end
   end
 
+<<<<<<< HEAD
   # ================================
   #          Exchange Rates
   # ================================
 
+=======
+>>>>>>> finos
   def fetch_exchange_rate(from:, to:, date:)
     with_provider_response do
       throttle_request
@@ -127,10 +130,13 @@ class Provider::TwelveData < Provider
     end
   end
 
+<<<<<<< HEAD
   # ================================
   #           Securities
   # ================================
 
+=======
+>>>>>>> finos
   def search_securities(symbol, country_code: nil, exchange_operating_mic: nil)
     with_provider_response do
       throttle_request

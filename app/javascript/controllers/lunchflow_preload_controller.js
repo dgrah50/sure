@@ -12,6 +12,18 @@ export default class extends Controller {
     this.preloadAccounts();
   }
 
+  /**
+   * Validates preload response structure
+   * @param {*} data - Response data
+   * @returns {boolean}
+   */
+  #isValidPreloadResponse(data) {
+    return data &&
+      typeof data === 'object' &&
+      typeof data.success === 'boolean' &&
+      typeof data.has_accounts === 'boolean';
+  }
+
   async preloadAccounts() {
     try {
       // Show loading state if we have a link target (on method selector page)
@@ -46,6 +58,11 @@ export default class extends Controller {
       }
 
       const data = await response.json();
+
+      if (!this.#isValidPreloadResponse(data)) {
+        console.error('Invalid preload response:', data);
+        throw new Error('Invalid preload response from server');
+      }
 
       if (data.success && data.has_accounts) {
         // Accounts loaded successfully, enable the link

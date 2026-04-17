@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PlaidAdapter serves dual purposes:
 #
 # 1. Configuration Manager (class-level):
@@ -9,6 +10,10 @@
 #    - Wraps ALL PlaidAccount instances regardless of region (US or EU)
 #    - The PlaidAccount's plaid_item.plaid_region determines which config to use
 #    - Delegates to Provider::Registry.plaid_provider_for_region(region)
+=======
+# Runtime adapter for PlaidAccount instances.
+# Configuration management is delegated to Provider::PlaidConfiguration.
+>>>>>>> finos
 class Provider::PlaidAdapter < Provider::Base
   include Provider::Syncable
   include Provider::InstitutionMetadata
@@ -74,11 +79,15 @@ class Provider::PlaidAdapter < Provider::Base
     configs
   end
 
+<<<<<<< HEAD
   # Mutex for thread-safe configuration loading
   # Initialized at class load time to avoid race conditions on mutex creation
   @config_mutex = Mutex.new
 
   # Configuration for Plaid US
+=======
+  # Configuration for Plaid US (delegated to PlaidConfiguration)
+>>>>>>> finos
   configure do
     description <<~DESC
       Setup instructions:
@@ -111,10 +120,24 @@ class Provider::PlaidAdapter < Provider::Base
     configured_check { get_value(:client_id).present? && get_value(:secret).present? }
   end
 
+<<<<<<< HEAD
+=======
+  # Delegate configuration loading to PlaidConfiguration
+  def self.ensure_configuration_loaded
+    Provider::PlaidConfiguration.ensure_configuration_loaded
+  end
+
+  # Delegate configuration reload to PlaidConfiguration
+  def self.reload_configuration
+    Provider::PlaidConfiguration.reload_configuration
+  end
+
+>>>>>>> finos
   def provider_name
     "plaid"
   end
 
+<<<<<<< HEAD
   # Thread-safe lazy loading of Plaid US configuration
   # Ensures configuration is loaded exactly once even under concurrent access
   def self.ensure_configuration_loaded
@@ -146,6 +169,8 @@ class Provider::PlaidAdapter < Provider::Base
     end
   end
 
+=======
+>>>>>>> finos
   def sync_path
     Rails.application.routes.url_helpers.sync_plaid_item_path(item)
   end

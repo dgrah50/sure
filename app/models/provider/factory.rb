@@ -28,9 +28,13 @@ class Provider::Factory
     # @param account_provider [AccountProvider] The account provider record
     # @return [Provider::Base] An adapter instance
     def from_account_provider(account_provider)
+<<<<<<< HEAD
       return nil if account_provider.nil?
 
       create_adapter(account_provider.provider, account: account_provider.account)
+=======
+      Provider::AccountAdapterFactory.create(account_provider)
+>>>>>>> finos
     end
 
     # Get list of registered provider types
@@ -63,11 +67,19 @@ class Provider::Factory
       find_adapter_class(provider_type).present?
     end
 
+<<<<<<< HEAD
     # Get all registered adapter classes
     # @return [Array<Class>] List of registered adapter classes
     def registered_adapters
       ensure_adapters_loaded
       registry.values.uniq
+=======
+    # Get list of registered provider types
+    # @return [Array<String>] List of registered provider type names
+    def registered_provider_types
+      ensure_adapters_loaded
+      registry.keys.sort
+>>>>>>> finos
     end
 
     # Get adapters that support a specific account type
@@ -86,10 +98,13 @@ class Provider::Factory
       adapters_for_account_type(account_type).any?
     end
 
+<<<<<<< HEAD
     # Get all available provider connection configs for a given account type
     # @param account_type [String] The account type class name (e.g., "Depository")
     # @param family [Family] The family to check connection availability for
     # @return [Array<Hash>] Array of connection configurations from all providers
+=======
+>>>>>>> finos
     def connection_configs_for_account_type(account_type:, family:)
       adapters_for_account_type(account_type).flat_map do |adapter_class|
         adapter_class.connection_configs(family: family)

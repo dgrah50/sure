@@ -1,13 +1,25 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Connects to data-controller="lazy-load"
-// Used with <details> elements to lazy-load content when expanded
-// Use data-action="toggle->lazy-load#toggled" on the <details> element
-// Optional: data-lazy-load-auto-open-param-value="paramName" to auto-open when ?paramName=1 is in URL
+/**
+ * Connects to data-controller="lazy-load"
+ * Used with <details> elements to lazy-load content when expanded
+ * Use data-action="toggle->lazy-load#toggled" on the <details> element
+ * Optional: data-lazy-load-auto-open-param-value="paramName" to auto-open when ?paramName=1 is in URL
+ */
 export default class extends Controller {
+  /** @type {string[]} */
   static targets = ["content", "loading", "frame"];
+
+  /** @type {Object.<string, any>} */
   static values = { url: String, loaded: Boolean, autoOpenParam: String };
 
+  /** @type {boolean} */
+  loading = false;
+
+  /**
+   * Initialize controller and check for auto-open params
+   * @returns {void}
+   */
   connect() {
     // Check if we should auto-open based on URL param
     if (this.hasAutoOpenParamValue && this.autoOpenParamValue) {
@@ -29,12 +41,20 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Handle toggle event from <details> element
+   * @returns {void}
+   */
   toggled() {
     if (this.element.open && !this.loadedValue) {
       this.load();
     }
   }
 
+  /**
+   * Load content from the server via fetch
+   * @returns {Promise<void>}
+   */
   async load() {
     if (this.loadedValue || this.loading) return;
     this.loading = true;
@@ -71,6 +91,11 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Display an error message in the loading target
+   * @param {string} message - The error message to display
+   * @returns {void}
+   */
   showError(message) {
     if (this.hasLoadingTarget) {
       this.loadingTarget.innerHTML = `<p class="text-destructive text-sm">${message}</p>`;

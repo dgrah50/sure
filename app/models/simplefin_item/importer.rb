@@ -140,7 +140,13 @@ class SimplefinItem::Importer
             available_balance: avail,
             institution: account_data.dig(:org, :name)
           )
+<<<<<<< HEAD
         rescue
+=======
+        rescue => mapper_error
+          Rails.logger.warn("SimpleFin: Account type inference failed for account_id=#{account_data[:id]}: #{mapper_error.message}")
+          Sentry.add_breadcrumb(category: "simplefin_import", message: "Account type inference failed: #{mapper_error.message}", data: { account_id: account_data[:id], account_name: account_data[:name] })
+>>>>>>> finos
           nil
         end
         is_mapper_liability = inferred && [ "CreditCard", "Loan" ].include?(inferred.accountable_type)
@@ -170,8 +176,14 @@ class SimplefinItem::Importer
                   observed: observed.to_s("F")
                 }.compact
                 Rails.logger.info("SimpleFIN overpayment heuristic (balances-only): unknown; falling back #{obs.inspect}")
+<<<<<<< HEAD
               rescue
                 # no-op
+=======
+              rescue => obs_error
+                Rails.logger.warn("SimpleFin: Failed to build overpayment observation data: #{obs_error.message}")
+                Sentry.add_breadcrumb(category: "simplefin_import", message: "Overpayment observation logging failed: #{obs_error.message}")
+>>>>>>> finos
               end
               both_present = bal.nonzero? && avail.nonzero?
               if both_present && same_sign?(bal, avail)
@@ -431,8 +443,14 @@ class SimplefinItem::Importer
             cat = classify_error(e)
             begin
               register_error(message: e.message.to_s, category: cat, account_id: account_data[:id], name: account_data[:name])
+<<<<<<< HEAD
             rescue
               # no-op if account_data is missing keys
+=======
+            rescue => register_error
+              Rails.logger.warn("SimpleFin: Failed to register error for account #{account_data[:id]} (chunked sync): #{register_error.message}")
+              Sentry.add_breadcrumb(category: "simplefin_import", message: "Error registration failed (chunked sync): #{register_error.message}", data: { account_id: account_data[:id], original_error: e.message })
+>>>>>>> finos
             end
             Rails.logger.warn("SimpleFin: Skipping account due to error: #{e.class} - #{e.message}")
           ensure
@@ -518,8 +536,14 @@ class SimplefinItem::Importer
           cat = classify_error(e)
           begin
             register_error(message: e.message.to_s, category: cat, account_id: account_data[:id], name: account_data[:name])
+<<<<<<< HEAD
           rescue
             # no-op if account_data is missing keys
+=======
+          rescue => register_error
+            Rails.logger.warn("SimpleFin: Failed to register error for account #{account_data[:id]}: #{register_error.message}")
+            Sentry.add_breadcrumb(category: "simplefin_import", message: "Error registration failed: #{register_error.message}", data: { account_id: account_data[:id], original_error: e.message })
+>>>>>>> finos
           end
           Rails.logger.warn("SimpleFin: Skipping account during regular sync due to error: #{e.class} - #{e.message}")
         ensure
@@ -562,8 +586,14 @@ class SimplefinItem::Importer
             cat = classify_error(e)
             begin
               register_error(message: e.message.to_s, category: cat, account_id: account_data[:id], name: account_data[:name])
+<<<<<<< HEAD
             rescue
               # no-op if account_data is missing keys
+=======
+            rescue => register_error
+              Rails.logger.warn("SimpleFin: Failed to register error for account #{account_data[:id]} (discovery): #{register_error.message}")
+              Sentry.add_breadcrumb(category: "simplefin_import", message: "Error registration failed (discovery): #{register_error.message}", data: { account_id: account_data[:id], original_error: e.message })
+>>>>>>> finos
             end
             Rails.logger.warn("SimpleFin discovery: Skipping account due to error: #{e.class} - #{e.message}")
           ensure

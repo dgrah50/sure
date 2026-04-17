@@ -146,7 +146,10 @@ class SnaptradeAccount < ApplicationRecord
     end
   end
 
+<<<<<<< HEAD
   # Get the SnapTrade provider instance via the parent item
+=======
+>>>>>>> finos
   def snaptrade_provider
     snaptrade_item.snaptrade_provider
   end

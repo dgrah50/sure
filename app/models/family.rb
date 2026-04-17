@@ -1,8 +1,5 @@
 class Family < ApplicationRecord
   include Syncable, Subscribeable, VectorSearchable
-  include PlaidConnectable, SimplefinConnectable, LunchflowConnectable, EnableBankingConnectable
-  include CoinbaseConnectable, BinanceConnectable, CoinstatsConnectable, SnaptradeConnectable, MercuryConnectable
-  include IndexaCapitalConnectable
 
   DATE_FORMATS = [
     [ "MM-DD-YYYY", "%m-%d-%Y" ],
@@ -26,6 +23,18 @@ class Family < ApplicationRecord
   has_many :accounts, dependent: :destroy
   has_many :invitations, dependent: :destroy
   has_many :family_exports, dependent: :destroy
+
+  # Provider items - associations stay in the model, logic moves to services
+  has_many :plaid_items, dependent: :destroy
+  has_many :simplefin_items, dependent: :destroy
+  has_many :lunchflow_items, dependent: :destroy
+  has_many :enable_banking_items, dependent: :destroy
+  has_many :coinbase_items, dependent: :destroy
+  has_many :binance_items, dependent: :destroy
+  has_many :coinstats_items, dependent: :destroy
+  has_many :snaptrade_items, dependent: :destroy
+  has_many :mercury_items, dependent: :destroy
+  has_many :indexa_capital_items, dependent: :destroy
 
   has_many :entries, through: :accounts
   has_many :transactions, through: :accounts
@@ -201,7 +210,111 @@ class Family < ApplicationRecord
     Rails.application.config.app_mode.self_hosted?
   end
 
+  # Provider Service Delegations
+  # These methods delegate to service classes to avoid bloating the model
+  # with provider-specific logic, respecting Single Responsibility Principle.
+
+  # Plaid
+  delegate :can_connect_us?, :can_connect_eu?, :create_plaid_item!, :get_link_token,
+           to: :plaid_service
+  alias_method :can_connect_plaid_us?, :can_connect_us?
+  alias_method :can_connect_plaid_eu?, :can_connect_eu?
+
+  # SimpleFIN
+  delegate :can_connect?, :create_simplefin_item!,
+           to: :simplefin_service
+  alias_method :can_connect_simplefin?, :can_connect?
+
+  # Lunchflow
+  delegate :can_connect?, :create_lunchflow_item!, :has_credentials?,
+           to: :lunchflow_service
+  alias_method :can_connect_lunchflow?, :can_connect?
+  alias_method :has_lunchflow_credentials?, :has_credentials?
+
+  # Enable Banking
+  delegate :can_connect?, :create_enable_banking_item!, :has_credentials?, :has_session?,
+           to: :enable_banking_service
+  alias_method :can_connect_enable_banking?, :can_connect?
+  alias_method :has_enable_banking_credentials?, :has_credentials?
+  alias_method :has_enable_banking_session?, :has_session?
+
+  # Coinbase
+  delegate :can_connect?, :create_coinbase_item!, :has_credentials?,
+           to: :coinbase_service
+  alias_method :can_connect_coinbase?, :can_connect?
+  alias_method :has_coinbase_credentials?, :has_credentials?
+
+  # Binance
+  delegate :can_connect?, :create_binance_item!, :has_credentials?,
+           to: :binance_service
+  alias_method :can_connect_binance?, :can_connect?
+  alias_method :has_binance_credentials?, :has_credentials?
+
+  # Coinstats
+  delegate :can_connect?, :create_coinstats_item!, :has_credentials?,
+           to: :coinstats_service
+  alias_method :can_connect_coinstats?, :can_connect?
+  alias_method :has_coinstats_credentials?, :has_credentials?
+
+  # Snaptrade
+  delegate :can_connect?, :create_snaptrade_item!, :has_credentials?,
+           to: :snaptrade_service
+  alias_method :can_connect_snaptrade?, :can_connect?
+  alias_method :has_snaptrade_credentials?, :has_credentials?
+
+  # Mercury
+  delegate :can_connect?, :create_mercury_item!, :has_credentials?,
+           to: :mercury_service
+  alias_method :can_connect_mercury?, :can_connect?
+  alias_method :has_mercury_credentials?, :has_credentials?
+
+  # Indexa Capital
+  delegate :can_connect?, :create_indexa_capital_item!, :has_credentials?,
+           to: :indexa_capital_service
+  alias_method :can_connect_indexa_capital?, :can_connect?
+  alias_method :has_indexa_capital_credentials?, :has_credentials?
+
   private
+    def plaid_service
+      @plaid_service ||= Family::PlaidService.new(self)
+    end
+
+    def simplefin_service
+      @simplefin_service ||= Family::SimplefinService.new(self)
+    end
+
+    def lunchflow_service
+      @lunchflow_service ||= Family::LunchflowService.new(self)
+    end
+
+    def enable_banking_service
+      @enable_banking_service ||= Family::EnableBankingService.new(self)
+    end
+
+    def coinbase_service
+      @coinbase_service ||= Family::CoinbaseService.new(self)
+    end
+
+    def binance_service
+      @binance_service ||= Family::BinanceService.new(self)
+    end
+
+    def coinstats_service
+      @coinstats_service ||= Family::CoinstatsService.new(self)
+    end
+
+    def snaptrade_service
+      @snaptrade_service ||= Family::SnaptradeService.new(self)
+    end
+
+    def mercury_service
+      @mercury_service ||= Family::MercuryService.new(self)
+    end
+
+    def indexa_capital_service
+      @indexa_capital_service ||= Family::IndexaCapitalService.new(self)
+    end
+
     def normalize_enabled_currencies!
       if enabled_currencies.blank?
         self.enabled_currencies = nil
