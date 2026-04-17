@@ -234,7 +234,6 @@ module Provider::ConfigurationRegistry
       registry.keys
     end
 
-    # Get the adapter class for a provider key
     def get_adapter_class(provider_key)
       adapter_registry[provider_key]
     end

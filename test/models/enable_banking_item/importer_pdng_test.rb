@@ -28,7 +28,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     @importer = EnableBankingItem::Importer.new(@enable_banking_item, enable_banking_provider: @mock_provider)
   end
 
-  # --- Post-fetch date filtering ---
+  
 
   test "filters out transactions before sync_start_date" do
     old_tx = {
@@ -132,7 +132,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     assert_equal true, result.first[:_pending]
   end
 
-  # --- identification_hashes matching ---
+  
 
   test "find_enable_banking_account_by_hash uses identification_hashes for matching" do
     # Account already exists with uid = identification_hash

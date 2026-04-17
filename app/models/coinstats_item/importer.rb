@@ -215,7 +215,6 @@ class CoinstatsItem::Importer
     # @param bulk_transactions_data [Array, nil] Pre-fetched transaction data
     # @return [Hash] Result with :success and :transactions_count
     def update_wallet_account(coinstats_account, bulk_balance_data:, bulk_transactions_data:)
-      # Get the wallet address and blockchain from the raw payload
       raw = coinstats_account.raw_payload || {}
       address = raw["address"] || raw[:address]
       blockchain = raw["blockchain"] || raw[:blockchain]

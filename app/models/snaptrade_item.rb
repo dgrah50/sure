@@ -181,7 +181,6 @@ class SnaptradeItem < ApplicationRecord
     snaptrade_accounts.joins(:account_provider)
   end
 
-  # Get all Sure accounts linked to this SnapTrade item
   def accounts
     snaptrade_accounts
       .includes(account_provider: :account)

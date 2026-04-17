@@ -1,9 +1,56 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 
+/**
+ * Parses a local date string in YYYY-MM-DD format.
+ * @param {string} dateStr - The date string to parse.
+ * @returns {Date|null} - The parsed Date object or null if parsing fails.
+ */
 const parseLocalDate = d3.timeParse("%Y-%m-%d");
 
+/**
+ * @typedef {Object} MoneyAmount
+ * @property {string} amount - The numeric amount as a string.
+ * @property {string} formatted - The formatted currency string.
+ * @property {string} currency - The ISO currency code.
+ */
+
+/**
+ * @typedef {Object} Trend
+ * @property {string} color - The color associated with the trend.
+ * @property {number} value - The trend value.
+ * @property {string} percent_formatted - The formatted percentage string.
+ * @property {MoneyAmount} current - The current amount.
+ * @property {MoneyAmount} previous - The previous amount.
+ */
+
+/**
+ * @typedef {Object} TimeSeriesPoint
+ * @property {Date} date - Parsed date object.
+ * @property {string} date_formatted - Formatted date string.
+ * @property {MoneyAmount|number} value - Data point value.
+ * @property {Trend} trend - Trend at this point.
+ */
+
+/**
+ * @typedef {Object} TimeSeriesData
+ * @property {TimeSeriesPoint[]} values - Array of data points.
+ * @property {Trend} trend - Overall trend information.
+ */
+
+/**
+ * Controller for rendering a D3 time series chart.
+ * @extends Controller
+ */
 export default class extends Controller {
+  /**
+   * Static values for the controller.
+   * @type {Object}
+   * @property {Object} data - The time series data.
+   * @property {number} strokeWidth - Stroke width configuration.
+   * @property {boolean} useLabels - Whether to display axis labels.
+   * @property {boolean} useTooltip - Whether to enable tooltips.
+   */
   static values = {
     data: Object,
     strokeWidth: { type: Number, default: 2 },
@@ -11,31 +58,56 @@ export default class extends Controller {
     useTooltip: { type: Boolean, default: true },
   };
 
+  /** @type {SVGSVGElement|null} */
   _d3SvgMemo = null;
+  /** @type {SVGGElement|null} */
   _d3GroupMemo = null;
+  /** @type {import("d3").Selection<HTMLDivElement, unknown, null, undefined>|null} */
   _d3Tooltip = null;
+  /** @type {number} */
   _d3InitialContainerWidth = 0;
+  /** @type {number} */
   _d3InitialContainerHeight = 0;
+  /** @type {TimeSeriesPoint[]} */
   _normalDataPoints = [];
+  /** @type {ResizeObserver|null} */
   _resizeObserver = null;
 
+  /**
+   * Called when the controller is connected to the DOM.
+   * @returns {void}
+   */
   connect() {
     this._install();
     document.addEventListener("turbo:load", this._reinstall);
     this._setupResizeObserver();
   }
 
+  /**
+   * Called when the controller is disconnected from the DOM.
+   * @returns {void}
+   */
   disconnect() {
     this._teardown();
     document.removeEventListener("turbo:load", this._reinstall);
     this._resizeObserver?.disconnect();
   }
 
+  /**
+   * Reinstalls the chart (teardown + install).
+   * @returns {void}
+   * @private
+   */
   _reinstall = () => {
     this._teardown();
     this._install();
   };
 
+  /**
+   * Cleans up D3 elements and resets state.
+   * @returns {void}
+   * @private
+   */
   _teardown() {
     this._d3SvgMemo = null;
     this._d3GroupMemo = null;
@@ -45,6 +117,11 @@ export default class extends Controller {
     this._d3Container.selectAll("*").remove();
   }
 
+  /**
+   * Installs the chart by normalizing data and drawing.
+   * @returns {void}
+   * @private
+   */
   _install() {
     this._normalizeDataPoints();
     this._rememberInitialContainerSize();
@@ -52,9 +129,8 @@ export default class extends Controller {
   }
 
   /**
-   * Normalizes raw data points for D3 consumption
-   * Transforms date strings to Date objects and preserves other properties
-   * @returns {Array<{date: Date, date_formatted: string, value: (Object|number), trend: Object}>}
+   * Normalizes raw data points for D3 consumption.
+   * @returns {void}
    * @private
    */
   _normalizeDataPoints() {
@@ -66,11 +142,21 @@ export default class extends Controller {
     }));
   }
 
+  /**
+   * Stores initial container dimensions.
+   * @returns {void}
+   * @private
+   */
   _rememberInitialContainerSize() {
     this._d3InitialContainerWidth = this._d3Container.node().clientWidth;
     this._d3InitialContainerHeight = this._d3Container.node().clientHeight;
   }
 
+  /**
+   * Main draw method - dispatches to empty or chart drawing.
+   * @returns {void}
+   * @private
+   */
   _draw() {
     // Guard against invalid dimensions (e.g., when container is collapsed or not yet rendered)
     const minWidth = 50;
@@ -91,6 +177,11 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Draws empty state visualization.
+   * @returns {void}
+   * @private
+   */
   _drawEmpty() {
     this._d3Svg.selectAll(".tick").remove();
     this._d3Svg.selectAll(".domain").remove();
@@ -99,6 +190,11 @@ export default class extends Controller {
     this._drawCenteredCircleEmptyState();
   }
 
+  /**
+   * Draws dashed line for empty state.
+   * @returns {void}
+   * @private
+   */
   _drawDashedLineEmptyState() {
     this._d3Svg
       .append("line")
@@ -110,6 +206,11 @@ export default class extends Controller {
       .attr("stroke-dasharray", "4, 4");
   }
 
+  /**
+   * Draws centered circle for empty state.
+   * @returns {void}
+   * @private
+   */
   _drawCenteredCircleEmptyState() {
     this._d3Svg
       .append("circle")
@@ -120,6 +221,11 @@ export default class extends Controller {
       .style("fill", "currentColor");
   }
 
+  /**
+   * Draws the main chart elements.
+   * @returns {void}
+   * @private
+   */
   _drawChart() {
     this._drawTrendline();
 
@@ -134,6 +240,11 @@ export default class extends Controller {
     }
   }
 
+  /**
+   * Draws the trendline path.
+   * @returns {void}
+   * @private
+   */
   _drawTrendline() {
     this._installTrendlineSplit();
 
@@ -148,6 +259,11 @@ export default class extends Controller {
       .attr("stroke-width", this.strokeWidthValue);
   }
 
+  /**
+   * Installs gradient for trendline color split.
+   * @returns {void}
+   * @private
+   */
   _installTrendlineSplit() {
     const gradient = this._d3Svg
       .append("defs")
@@ -186,6 +302,12 @@ export default class extends Controller {
       .attr("stop-color", "var(--color-gray-400)");
   }
 
+  /**
+   * Sets the trendline split position.
+   * @param {number} percent - Position as decimal (0-1).
+   * @returns {void}
+   * @private
+   */
   _setTrendlineSplitAt(percent) {
     const position = percent * 100;
 
@@ -205,6 +327,11 @@ export default class extends Controller {
       .attr("width", this._d3ContainerWidth * percent);
   }
 
+  /**
+   * Draws X-axis labels.
+   * @returns {void}
+   * @private
+   */
   _drawXAxisLabels() {
     // Add ticks
     this._d3Group
@@ -237,6 +364,11 @@ export default class extends Controller {
       .attr("dy", "0em");
   }
 
+  /**
+   * Draws gradient fill below the trendline.
+   * @returns {void}
+   * @private
+   */
   _drawGradientBelowTrendline() {
     // Define gradient
     const gradient = this._d3Group
@@ -289,6 +421,11 @@ export default class extends Controller {
       .style("fill", `url(#${this.element.id}-trendline-gradient)`);
   }
 
+  /**
+   * Creates the tooltip element.
+   * @returns {void}
+   * @private
+   */
   _drawTooltip() {
     this._d3Tooltip = d3
       .select(`#${this.element.id}`)
@@ -299,6 +436,11 @@ export default class extends Controller {
       );
   }
 
+  /**
+   * Sets up mouse tracking for tooltip display.
+   * @returns {void}
+   * @private
+   */
   _trackMouseForShowingTooltip() {
     const bisectDate = d3.bisector((d) => d.date).left;
 
@@ -391,9 +533,9 @@ export default class extends Controller {
   }
 
   /**
-   * Generates HTML template for tooltip display
-   * @param {{date_formatted: string, trend: {value: number, color: string, percent_formatted: string, current: (Object|number), previous: (Object|number)}}} datum - Normalized data point
-   * @returns {string} HTML string for tooltip content
+   * Generates HTML template for tooltip display.
+   * @param {TimeSeriesPoint} datum - Normalized data point.
+   * @returns {string} HTML string for tooltip content.
    * @private
    */
   _tooltipTemplate(datum) {
@@ -423,9 +565,9 @@ export default class extends Controller {
   }
 
   /**
-   * Returns SVG icon for trend direction (increase, decrease, or flat)
-   * @param {{trend: {color: string, current: {amount: string|number}, previous: {amount: string|number}}}} datum - Data point with trend info
-   * @returns {string} SVG string for trend indicator icon
+   * Returns SVG icon for trend direction (increase, decrease, or flat).
+   * @param {TimeSeriesPoint} datum - Data point with trend info.
+   * @returns {string} SVG string for trend indicator icon.
    * @private
    */
   _getTrendIcon(datum) {
@@ -446,9 +588,9 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the numeric value from a normalized data point
-   * @param {{value: (Object|number)}} datum - Normalized data point
-   * @returns {number} Numeric value extracted from datum
+   * Extracts numeric value from a data point.
+   * @param {TimeSeriesPoint} datum - The data point.
+   * @returns {number} The numeric value.
    * @private
    */
   _getDatumValue = (datum) => {
@@ -456,9 +598,9 @@ export default class extends Controller {
   };
 
   /**
-   * Extracts numeric value from Money object or primitive number
-   * @param {(Object|number)} numeric - Money object with 'amount' property or primitive number
-   * @returns {number} Extracted numeric value
+   * Extracts numeric value from Money object or primitive number.
+   * @param {MoneyAmount|number} numeric - Money object or primitive number.
+   * @returns {number} Extracted numeric value.
    * @private
    */
   _extractNumericValue = (numeric) => {
@@ -469,9 +611,9 @@ export default class extends Controller {
   };
 
   /**
-   * Extracts formatted value string from Money object or returns primitive value
-   * @param {(Object|number|string)} numeric - Money object with 'formatted' property or primitive value
-   * @returns {string} Formatted value string or primitive as string
+   * Extracts formatted value string from Money object or returns primitive value.
+   * @param {MoneyAmount|number|string} numeric - Money object or primitive value.
+   * @returns {string} Formatted value string or primitive as string.
    * @private
    */
   _extractFormattedValue = (numeric) => {
@@ -481,6 +623,11 @@ export default class extends Controller {
     return numeric;
   };
 
+  /**
+   * Creates the main SVG element.
+   * @returns {import("d3").Selection<SVGSVGElement, unknown, null, undefined>} The SVG selection.
+   * @private
+   */
   _createMainSvg() {
     return this._d3Container
       .append("svg")
@@ -494,6 +641,11 @@ export default class extends Controller {
       ]);
   }
 
+  /**
+   * Creates the main group element for chart content.
+   * @returns {import("d3").Selection<SVGGElement, unknown, null, undefined>} The group selection.
+   * @private
+   */
   _createMainGroup() {
     return this._d3Svg
       .append("g")
@@ -501,8 +653,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets or creates the main SVG element for the chart
-   * @returns {d3.Selection} D3 selection of the SVG element
+   * Gets or creates the main SVG element.
+   * @returns {import("d3").Selection<SVGSVGElement, unknown, null, undefined>} The SVG selection.
    * @private
    */
   get _d3Svg() {
@@ -513,8 +665,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets or creates the main group element for chart content
-   * @returns {d3.Selection} D3 selection of the group element with margin transform applied
+   * Gets or creates the main D3 group.
+   * @returns {import("d3").Selection<SVGGElement, unknown, null, undefined>} The group selection.
    * @private
    */
   get _d3Group() {
@@ -525,8 +677,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the margin configuration for chart layout
-   * @returns {{top: number, right: number, bottom: number, left: number}} Margin object with pixel values
+   * Gets the margin configuration based on label setting.
+   * @returns {{top: number, right: number, bottom: number, left: number}} The margin object.
    * @private
    */
   get _margin() {
@@ -537,8 +689,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the container width available for chart content (excluding margins)
-   * @returns {number} Width in pixels
+   * Gets the available chart width (minus margins).
+   * @returns {number} The container width.
    * @private
    */
   get _d3ContainerWidth() {
@@ -548,8 +700,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the container height available for chart content (excluding margins)
-   * @returns {number} Height in pixels
+   * Gets the available chart height (minus margins).
+   * @returns {number} The container height.
    * @private
    */
   get _d3ContainerHeight() {
@@ -559,8 +711,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the D3 selection of the chart container element
-   * @returns {d3.Selection} D3 selection of the controller's element
+   * Gets the D3 container selection.
+   * @returns {import("d3").Selection<HTMLElement, unknown, null, undefined>} The container selection.
    * @private
    */
   get _d3Container() {
@@ -568,8 +720,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the trend color from the data value
-   * @returns {string} CSS color value
+   * Gets the trend color from data.
+   * @returns {string} The trend color.
    * @private
    */
   get _trendColor() {
@@ -577,8 +729,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the D3 line generator for trendline path creation
-   * @returns {d3.Line} D3 line generator configured for time series data
+   * Gets the D3 line generator.
+   * @returns {import("d3").Line<TimeSeriesPoint>} The line generator.
    * @private
    */
   get _d3Line() {
@@ -589,8 +741,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the D3 time scale for x-axis positioning
-   * @returns {d3.ScaleTime} D3 time scale mapping dates to pixel positions
+   * Gets the D3 X scale (time scale).
+   * @returns {import("d3").ScaleTime<number, number>} The time scale.
    * @private
    */
   get _d3XScale() {
@@ -601,9 +753,8 @@ export default class extends Controller {
   }
 
   /**
-   * Gets the D3 linear scale for y-axis positioning
-   * Handles edge cases like uniform values and includes dynamic baseline calculation
-   * @returns {d3.ScaleLinear} D3 linear scale mapping values to pixel positions
+   * Gets the D3 Y scale (linear scale).
+   * @returns {import("d3").ScaleLinear<number, number>} The linear scale.
    * @private
    */
   get _d3YScale() {
@@ -660,6 +811,11 @@ export default class extends Controller {
       .domain([yMin, yMax]);
   }
 
+  /**
+   * Sets up the resize observer for responsive charts.
+   * @returns {void}
+   * @private
+   */
   _setupResizeObserver() {
     this._resizeObserver = new ResizeObserver(() => {
       this._reinstall();

@@ -83,7 +83,6 @@ class Eval::Dataset < ApplicationRecord
     }
   end
 
-  # Get the appropriate runner class for this dataset type
   def runner_class
     case eval_type
     when "categorization"
@@ -97,7 +96,6 @@ class Eval::Dataset < ApplicationRecord
     end
   end
 
-  # Get the appropriate metrics class for this dataset type
   def metrics_class
     case eval_type
     when "categorization"

@@ -405,7 +405,6 @@ class SimplefinItem < ApplicationRecord
     requires_update? || stale_sync_status[:stale] || pending_account_setup?
   end
 
-  # Get a summary of issues requiring attention
   def attention_summary
     issues = []
     issues << "Connection needs update" if requires_update?
@@ -435,7 +434,6 @@ class SimplefinItem < ApplicationRecord
   # Count stale pending transactions (>8 days old) across all linked accounts
   # Returns { count: N, accounts: [names] } or { count: 0 } if none
   def stale_pending_status(days: 8)
-    # Get all accounts linked to this SimpleFIN item
     # Eager-load both association paths to avoid N+1 on current_account method
     linked_accounts = simplefin_accounts.includes(:account, :linked_account).filter_map(&:current_account)
     return { count: 0 } if linked_accounts.empty?

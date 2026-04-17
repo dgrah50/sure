@@ -19,7 +19,6 @@ class Provider::Coinstats < Provider
     @api_key = api_key
   end
 
-  # Get the list of blockchains supported by CoinStats
   # https://coinstats.app/api-docs/openapi/get-blockchains
   def get_blockchains
     with_provider_response do
@@ -63,7 +62,6 @@ class Provider::Coinstats < Provider
     []
   end
 
-  # Get the list of exchange connections supported by CoinStats
   # https://coinstats.app/api-docs/openapi/get-exchanges
   def get_exchanges
     with_provider_response do

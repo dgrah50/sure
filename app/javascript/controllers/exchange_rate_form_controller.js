@@ -284,6 +284,26 @@ export default class extends Controller {
   }
 
   /**
+   * Validates exchange rate response
+   * @param {*} data - Response data
+   * @returns {boolean}
+   */
+  #isValidExchangeRateResponse(data) {
+    if (!data || typeof data !== 'object') return false;
+
+    // Success case: has rate property
+    if (typeof data.rate === 'number') return true;
+
+    // Same currency case
+    if (data.same_currency === true && typeof data.rate === 'number') return true;
+
+    // Error case: has error string
+    if (typeof data.error === 'string') return true;
+
+    return false;
+  }
+
+  /**
    * Fetches exchange rate from the server
    * @param {string} fromCurrency - Source currency code (e.g., "USD")
    * @param {string} toCurrency - Target currency code (e.g., "EUR")
@@ -309,6 +329,11 @@ export default class extends Controller {
       const response = await fetch(url, { signal });
       /** @type {ExchangeRateResponse} */
       const data = await response.json();
+
+      if (!this.#isValidExchangeRateResponse(data)) {
+        console.error('Invalid exchange rate response:', data);
+        throw new Error('Invalid exchange rate response from server');
+      }
 
       if (!this.isCurrentExchangeRateState(fromCurrency, toCurrency, date)) {
         return;
