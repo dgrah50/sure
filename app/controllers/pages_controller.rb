@@ -31,6 +31,26 @@ class PagesController < ApplicationController
     @breadcrumbs = [ [ "Home", root_path ], [ "Dashboard", nil ] ]
   end
 
+  def overview
+    @balance_sheet = Current.family.balance_sheet
+    @investment_statement = Current.family.investment_statement
+    @top_action = Current.family.top_actions.active.ordered.first
+    @data_quality = Current.family.data_quality_summary
+    
+    # Calculate net worth changes
+    @net_worth_data = calculate_net_worth_changes
+    
+    @total_accounts = Current.family.accounts.active.count
+    @holdings_count = Current.family.holdings.distinct.count(:security_id)
+    @last_sync_at = Current.family.accounts.maximum(:last_sync_at)
+    
+    # Risk and guardrail data
+    @risk_assessment = RiskAssessmentService.new(Current.family).assess
+    @guardrail_violations = @risk_assessment[:guardrails].select { |g| g[:status] == "violation" }
+    
+    @breadcrumbs = [ [ t(".title"), nil ] ]
+  end
+
   def intro
     @breadcrumbs = [ [ "Home", chats_path ], [ "Intro", nil ] ]
   end
@@ -83,6 +103,33 @@ class PagesController < ApplicationController
         permitted["collapsed_sections"] = prefs[:collapsed_sections].to_unsafe_h if prefs[:collapsed_sections]
         permitted["section_order"] = prefs[:section_order] if prefs[:section_order]
       end
+    end
+
+    def calculate_net_worth_changes
+      current_net_worth = Current.family.balance_sheet.net_worth_money
+      
+      {
+        current: current_net_worth,
+        day_1: net_worth_at_days_ago(1),
+        day_7: net_worth_at_days_ago(7),
+        day_30: net_worth_at_days_ago(30)
+      }
+    end
+
+    def net_worth_at_days_ago(days)
+      target_date = days.days.ago.to_date
+      
+      # Calculate net worth by summing account balances as of the target date
+      accounts = Current.family.accounts.active
+      total_value = accounts.sum { |account| account_balance_on_date(account, target_date) }
+      
+      Money.new(total_value, Current.family.currency)
+    end
+
+    def account_balance_on_date(account, date)
+      # Find the most recent balance on or before the target date
+      balance = account.balances.where("date <= ?", date).order(date: :desc).first
+      balance ? balance.balance : account.balance
     end
 
     def build_dashboard_sections

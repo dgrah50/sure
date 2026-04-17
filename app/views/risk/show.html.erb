@@ -1,0 +1,192 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl lg:text-3xl font-medium text-primary">
+        <%= t(".title") %>
+      </h1>
+      <% if @regime[:mode].present? %>
+        <%= render "shared/badge", color: regime_badge_color(@regime[:mode]) do %>
+          <%= t(".regime.#{@regime[:mode]}") %>
+        <% end %>
+      <% end %>
+    </div>
+    <p class="text-sm lg:text-base text-secondary">
+      <%= t(".subtitle") %>
+    </p>
+  </div>
+<% end %>
+
+<%# Regime Mode Explanation %>
+<% if @regime[:mode].present? && @regime[:mode] != :unknown %>
+  <div class="bg-container rounded-xl shadow-border-xs p-4 mb-6">
+    <div class="flex items-start gap-3">
+      <%= icon regime_icon(@regime[:mode]), size: "lg", class: "text-#{regime_color(@regime[:mode])} shrink-0 mt-0.5" %>
+      <div>
+        <h2 class="text-sm font-medium text-primary mb-1">
+          <%= t(".regime_explanation.#{@regime[:mode]}.title") %>
+        </h2>
+        <p class="text-sm text-secondary">
+          <%= t(".regime_explanation.#{@regime[:mode]}.description") %>
+        </p>
+        <% if @regime[:confidence].present? %>
+          <p class="text-xs text-secondary mt-2">
+            <%= t(".confidence", level: t(".confidence_levels.#{@regime[:confidence]}")) %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <%# Guardrail Checklist %>
+  <div class="bg-container rounded-xl shadow-border-xs overflow-hidden">
+    <div class="px-6 py-4 border-b border-divider">
+      <h2 class="text-lg font-medium text-primary"><%= t(".guardrails_title") %></h2>
+    </div>
+    
+    <% if @guardrails.any? %>
+      <div class="divide-y divide-divider">
+        <% @guardrails.each do |guardrail| %>
+          <div class="px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <%= icon guardrail_status_icon(guardrail[:status]), size: "md", class: guardrail_status_color(guardrail[:status]) %>
+              <div>
+                <p class="text-sm font-medium text-primary"><%= guardrail[:name] %></p>
+                <% if guardrail[:message].present? %>
+                  <p class="text-xs text-secondary"><%= guardrail[:message] %></p>
+                <% end %>
+              </div>
+            </div>
+            <span class="text-xs text-secondary">
+              <%= guardrail[:type].to_s.humanize %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-6 py-8 text-center">
+        <%= icon "check-circle", size: "xl", class: "mx-auto mb-4 text-success" %>
+        <p class="text-sm text-secondary"><%= t(".no_guardrails") %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Concentration Metrics %>
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <h2 class="text-lg font-medium text-primary mb-4"><%= t(".concentration_title") %></h2>
+    
+    <div class="grid grid-cols-2 gap-4">
+      <%# Largest Holding %>
+      <div class="bg-surface rounded-lg p-4">
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <%= icon "pie-chart", size: "sm" %>
+          <span class="text-xs"><%= t(".metrics.largest_holding") %></span>
+        </div>
+        <p class="text-2xl font-medium <%= concentration_risk_color(@concentration[:largest_holding_pct]) %>">
+          <%= number_to_percentage(@concentration[:largest_holding_pct], precision: 1) %>
+        </p>
+      </div>
+
+      <%# BTC Concentration %>
+      <div class="bg-surface rounded-lg p-4">
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <%= icon "bitcoin", size: "sm" %>
+          <span class="text-xs"><%= t(".metrics.btc_concentration") %></span>
+        </div>
+        <p class="text-2xl font-medium <%= concentration_risk_color(@concentration[:btc_concentration_pct]) %>">
+          <%= number_to_percentage(@concentration[:btc_concentration_pct], precision: 1) %>
+        </p>
+      </div>
+
+      <%# Top 5 Concentration %>
+      <div class="bg-surface rounded-lg p-4">
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <%= icon "layers", size: "sm" %>
+          <span class="text-xs"><%= t(".metrics.top_5") %></span>
+        </div>
+        <p class="text-2xl font-medium <%= concentration_risk_color(@concentration[:top_5_pct]) %>">
+          <%= number_to_percentage(@concentration[:top_5_pct], precision: 1) %>
+        </p>
+      </div>
+
+      <%# High-Beta Exposure %>
+      <div class="bg-surface rounded-lg p-4">
+        <div class="flex items-center gap-2 text-secondary mb-2">
+          <%= icon "activity", size: "sm" %>
+          <span class="text-xs"><%= t(".metrics.high_beta") %></span>
+        </div>
+        <p class="text-2xl font-medium <%= concentration_risk_color(@exposure[:high_beta_pct]) %>">
+          <%= number_to_percentage(@exposure[:high_beta_pct], precision: 1) %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Liquidity Status %>
+<div class="bg-container rounded-xl shadow-border-xs p-6 mt-6">
+  <h2 class="text-lg font-medium text-primary mb-4"><%= t(".liquidity_title") %></h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-surface rounded-lg p-4">
+      <div class="flex items-center gap-2 text-secondary mb-2">
+        <%= icon "banknote", size: "sm" %>
+        <span class="text-xs"><%= t(".liquidity.current_cash") %></span>
+      </div>
+      <p class="text-2xl font-medium text-primary privacy-sensitive">
+        <%= number_to_percentage(@liquidity[:cash_pct], precision: 1) %>
+      </p>
+    </div>
+
+    <div class="bg-surface rounded-lg p-4">
+      <div class="flex items-center gap-2 text-secondary mb-2">
+        <%= icon "shield", size: "sm" %>
+        <span class="text-xs"><%= t(".liquidity.minimum_floor") %></span>
+      </div>
+      <p class="text-2xl font-medium text-primary">
+        <%= number_to_percentage(@liquidity[:minimum_required], precision: 1) %>
+      </p>
+    </div>
+
+    <div class="bg-surface rounded-lg p-4">
+      <div class="flex items-center gap-2 text-secondary mb-2">
+        <%= icon "trending-up", size: "sm" %>
+        <span class="text-xs"><%= t(".liquidity.distance_to_floor") %></span>
+      </div>
+      <% distance = @liquidity[:cash_pct] - @liquidity[:minimum_required] %>
+      <p class="text-2xl font-medium <%= distance >= 0 ? 'text-success' : 'text-destructive' %>">
+        <%= distance >= 0 ? '+' : '' %><%= number_to_percentage(distance, precision: 1) %>
+      </p>
+    </div>
+  </div>
+
+  <%# Liquidity Bar %>
+  <div class="mt-4">
+    <div class="h-3 bg-surface-inset rounded-full overflow-hidden">
+      <div class="h-full flex">
+        <div class="h-full bg-success" style="width: <%= [@liquidity[:cash_pct], 100].min %>"></div>
+        <div class="h-full bg-warning/50" style="width: <%= [@liquidity[:minimum_required] - @liquidity[:cash_pct], 0].max %>"></div>
+      </div>
+    </div>
+    <div class="flex justify-between text-xs text-secondary mt-2">
+      <span><%= t(".liquidity.current", pct: number_to_percentage(@liquidity[:cash_pct], precision: 1)) %></span>
+      <span><%= t(".liquidity.minimum", pct: number_to_percentage(@liquidity[:minimum_required], precision: 1)) %></span>
+    </div>
+  </div>
+</div>
+
+<%# Data Quality Warnings %>
+<% if @data_quality[:issues_count].to_i > 0 %>
+  <div class="bg-warning/10 border border-warning/20 rounded-xl p-6 mt-6">
+    <div class="flex items-start gap-3">
+      <%= icon "alert-triangle", size: "md", class: "text-warning shrink-0 mt-0.5" %>
+      <div>
+        <h3 class="text-sm font-medium text-primary mb-1"><%= t(".data_quality_title") %></h3>
+        <p class="text-sm text-secondary">
+          <%= t(".data_quality_description", score: @data_quality[:overall_score], count: @data_quality[:issues_count]) %>
+        </p>
+      </div>
+    </div>
+  </div>
+<% end %>

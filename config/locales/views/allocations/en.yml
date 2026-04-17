@@ -1,0 +1,30 @@
+---
+en:
+  allocations:
+    show:
+      title: "Allocation"
+      subtitle: "Target vs Current Portfolio Allocation"
+      nav:
+        overview: "Overview"
+      total_portfolio: "Total Portfolio Value"
+      allocation_table_title: "Sleeve Allocation"
+      table:
+        sleeve: "Sleeve"
+        target: "Target %"
+        current: "Current %"
+        gap: "Dollar Gap"
+        status: "Status"
+      status:
+        on_target: "On Target"
+        under_allocated: "Under"
+        over_allocated: "Over"
+      no_policy_title: "No Investment Policy"
+      no_policy_description: "Create a policy to set target allocations and guardrails."
+      create_policy: "Create Policy"
+      no_holdings_title: "No Holdings"
+      no_holdings_description: "Add investment accounts to track allocation."
+      unmapped_title: "Unmapped Holdings"
+      unmapped_description: "%{count} holdings need to be mapped to sleeves."
+      map_holdings: "Map Holdings"
+      account_breakdown_title: "Account Breakdown"
+      no_accounts: "No active investment accounts"

@@ -268,6 +268,11 @@ Rails.application.routes.draw do
 
   resources :decision_logs, only: [:index, :show]
 
+  # Financial OS routes
+  get "overview", to: "pages#overview", as: :overview
+  get "allocation", to: "allocations#show", as: :allocation
+  get "risk", to: "risk#show", as: :risk
+
   resources :transactions, only: %i[index new create show update destroy] do
     resource :split, only: %i[new create edit update destroy]
     resources :attachments, only: %i[show create destroy], controller: :transaction_attachments

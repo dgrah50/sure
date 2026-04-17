@@ -1,0 +1,172 @@
+<% content_for :page_header do %>
+  <div class="space-y-1 mb-6">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">
+      <%= t(".title") %>
+    </h1>
+    <p class="text-sm lg:text-base text-secondary">
+      <%= t(".subtitle") %>
+    </p>
+  </div>
+<% end %>
+
+<%# Data Quality Banner %>
+<% if @data_quality&.overall_score.present? && @data_quality.overall_score < 75 %>
+  <div class="mb-6">
+    <%= render DS::Alert.new(
+      message: t(".data_quality_alert", score: @data_quality.overall_score),
+      variant: :warning
+    ) %>
+  </div>
+<% end %>
+
+<%# Net Worth Header %>
+<div class="bg-container rounded-xl shadow-border-xs p-6 mb-6">
+  <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div>
+      <p class="text-sm text-secondary mb-1"><%= t(".net_worth_label") %></p>
+      <p class="text-3xl lg:text-4xl font-medium text-primary privacy-sensitive"><%= format_money(@net_worth_data[:current]) %></p>
+    </div>
+    
+    <div class="flex gap-6 lg:gap-8">
+      <% if @net_worth_data[:day_1].present? %>
+        <div>
+          <p class="text-xs text-secondary mb-1"><%= t(".change_1d") %></p>
+          <% change_1d = @net_worth_data[:current] - @net_worth_data[:day_1] %>
+          <p class="text-sm font-medium <%= change_1d >= 0 ? 'text-success' : 'text-destructive' %>">
+            <%= change_1d >= 0 ? '+' : '' %><%= format_money(change_1d) %>
+          </p>
+        </div>
+      <% end %>
+      
+      <% if @net_worth_data[:day_7].present? %>
+        <div>
+          <p class="text-xs text-secondary mb-1"><%= t(".change_7d") %></p>
+          <% change_7d = @net_worth_data[:current] - @net_worth_data[:day_7] %>
+          <p class="text-sm font-medium <%= change_7d >= 0 ? 'text-success' : 'text-destructive' %>">
+            <%= change_7d >= 0 ? '+' : '' %><%= format_money(change_7d) %>
+          </p>
+        </div>
+      <% end %>
+      
+      <% if @net_worth_data[:day_30].present? %>
+        <div>
+          <p class="text-xs text-secondary mb-1"><%= t(".change_30d") %></p>
+          <% change_30d = @net_worth_data[:current] - @net_worth_data[:day_30] %>
+          <p class="text-sm font-medium <%= change_30d >= 0 ? 'text-success' : 'text-destructive' %>">
+            <%= change_30d >= 0 ? '+' : '' %><%= format_money(change_30d) %>
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# Top Action Widget %>
+<div class="mb-6">
+  <h2 class="text-lg font-medium text-primary mb-3"><%= t(".top_action_title") %></h2>
+  <% if @top_action.present? %>
+    <%= render "top_actions/widget", top_action: @top_action %>
+  <% else %>
+    <%= render "top_actions/empty" %>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <%# Allocation Mini-Chart %>
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-primary"><%= t(".allocation_title") %></h2>
+      <%= link_to allocation_path, class: "text-sm text-secondary hover:text-primary transition-colors" do %>
+        <%= t(".view_details") %> <%= icon "arrow-right", size: "sm" %>
+      <% end %>
+    </div>
+    
+    <% allocation = @investment_statement.allocation %>
+    <% if allocation.any? %>
+      <div class="space-y-3">
+        <% allocation.first(5).each do |item| %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-primary"><%= item.security.ticker %></span>
+              <span class="text-secondary"><%= number_to_percentage(item.weight, precision: 1) %></span>
+            </div>
+            <div class="h-2 bg-surface-inset rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width: <%= item.weight %>"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-secondary"><%= t(".no_allocation_data") %></p>
+    <% end %>
+  </div>
+
+  <%# Guardrail Breaches %>
+  <div class="bg-container rounded-xl shadow-border-xs p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-primary"><%= t(".guardrails_title") %></h2>
+      <%= link_to risk_path, class: "text-sm text-secondary hover:text-primary transition-colors" do %>
+        <%= t(".view_details") %> <%= icon "arrow-right", size: "sm" %>
+      <% end %>
+    </div>
+    
+    <% if @guardrail_violations.any? %>
+      <div class="space-y-3">
+        <% @guardrail_violations.first(3).each do |violation| %>
+          <%= render DS::Alert.new(
+            message: violation[:message],
+            variant: violation[:severity] == "critical" ? :error : :warning
+          ) %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex items-center gap-2 text-success">
+        <%= icon "check-circle", size: "md" %>
+        <span class="text-sm"><%= t(".all_guardrails_clear") %></span>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%# Quick Stats Row %>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center gap-2 text-secondary mb-2">
+      <%= icon "wallet", size: "sm" %>
+      <span class="text-xs"><%= t(".total_accounts") %></span>
+    </div>
+    <p class="text-2xl font-medium text-primary"><%= @total_accounts %></p>
+  </div>
+  
+  <div class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center gap-2 text-secondary mb-2">
+      <%= icon "bar-chart-3", size: "sm" %>
+      <span class="text-xs"><%= t(".holdings_count") %></span>
+    </div>
+    <p class="text-2xl font-medium text-primary"><%= @holdings_count %></p>
+  </div>
+  
+  <div class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center gap-2 text-secondary mb-2">
+      <%= icon "shield-check", size: "sm" %>
+      <span class="text-xs"><%= t(".risk_level") %></span>
+    </div>
+    <p class="text-2xl font-medium <%= @risk_assessment[:overall_risk_level] == 'low' ? 'text-success' : @risk_assessment[:overall_risk_level] == 'critical' ? 'text-destructive' : 'text-warning' %>">
+      <%= t(".risk_levels.#{@risk_assessment[:overall_risk_level]}") %>
+    </p>
+  </div>
+  
+  <div class="bg-container rounded-xl shadow-border-xs p-4">
+    <div class="flex items-center gap-2 text-secondary mb-2">
+      <%= icon "refresh-cw", size: "sm" %>
+      <span class="text-xs"><%= t(".last_sync") %></span>
+    </div>
+    <p class="text-sm font-medium text-primary">
+      <% if @last_sync_at.present? %>
+        <%= time_ago_in_words(@last_sync_at) %> <%= t(".ago") %>
+      <% else %>
+        <%= t(".never") %>
+      <% end %>
+    </p>
+  </div>
+</div>

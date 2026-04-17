@@ -9,6 +9,12 @@ en:
         home: Home
         reports: Reports
         transactions: Transactions
+        overview: Overview
+        allocation: Allocation
+        risk: Risk
+        recommendations: Recommendations
+        policy_studio: Policy Studio
+        data_sources: Data Sources
     auth:
       existing_account: Already have an account?
       no_account: New to %{product_name}?

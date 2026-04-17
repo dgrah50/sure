@@ -1,5 +1,5 @@
 <% intro_mode = Current.user&.ui_layout_intro? %>
-<% home_path = intro_mode ? chats_path : root_path %>
+<% home_path = intro_mode ? chats_path : overview_path %>
 <% mobile_nav_items = if intro_mode
   [
     { name: t(".nav.home"), path: chats_path, icon: "home", icon_custom: false, active: page_active?(chats_path) },
@@ -7,10 +7,12 @@
   ]
 else
   [
-    { name: t(".nav.home"), path: root_path, icon: "pie-chart", icon_custom: false, active: page_active?(root_path) },
-    { name: t(".nav.transactions"), path: transactions_path, icon: "credit-card", icon_custom: false, active: page_active?(transactions_path) },
-    { name: t(".nav.reports"), path: reports_path, icon: "chart-bar", icon_custom: false, active: page_active?(reports_path) },
-    { name: t(".nav.budgets"), path: budgets_path, icon: "map", icon_custom: false, active: page_active?(budgets_path) },
+    { name: t(".nav.overview"), path: overview_path, icon: "layout-dashboard", icon_custom: false, active: page_active?(overview_path) },
+    { name: t(".nav.allocation"), path: allocation_path, icon: "pie-chart", icon_custom: false, active: page_active?(allocation_path) },
+    { name: t(".nav.risk"), path: risk_path, icon: "shield-check", icon_custom: false, active: page_active?(risk_path) },
+    { name: t(".nav.recommendations"), path: recommendations_path, icon: "lightbulb", icon_custom: false, active: page_active?(recommendations_path) },
+    { name: t(".nav.policy_studio"), path: policy_versions_path, icon: "sliders", icon_custom: false, active: page_active?(policy_versions_path) },
+    { name: t(".nav.data_sources"), path: data_sources_path, icon: "database", icon_custom: false, active: page_active?(data_sources_path), mobile_only: true },
     { name: t(".nav.assistant"), path: chats_path, icon: "icon-assistant", icon_custom: true, active: page_active?(chats_path), mobile_only: true }
   ]
 end %>

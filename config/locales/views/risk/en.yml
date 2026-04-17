@@ -1,0 +1,45 @@
+---
+en:
+  risk:
+    show:
+      title: "Risk"
+      subtitle: "Portfolio Risk Assessment & Guardrail Status"
+      regime:
+        normal: "Normal"
+        caution: "Caution"
+        crisis: "Crisis"
+        unknown: "Unknown"
+      regime_explanation:
+        normal:
+          title: "Normal Market Conditions"
+          description: "All indicators within normal ranges. Continue regular rebalancing."
+        caution:
+          title: "Elevated Risk Detected"
+          description: "Moderate market stress detected. Review allocations and consider reducing risk."
+        crisis:
+          title: "Crisis Conditions"
+          description: "Significant market stress. Execute crisis protocols and preserve capital."
+      confidence: "Confidence: %{level}"
+      confidence_levels:
+        low: "Low"
+        medium: "Medium"
+        high: "High"
+      guardrails_title: "Guardrail Checklist"
+      no_guardrails: "No active guardrails configured"
+      concentration_title: "Concentration Metrics"
+      metrics:
+        largest_holding: "Largest Holding"
+        btc_concentration: "BTC Concentration"
+        top_5: "Top 5 Holdings"
+        high_beta: "High-Beta Exposure"
+      liquidity_title: "Liquidity Status"
+      liquidity:
+        current_cash: "Current Cash %"
+        minimum_floor: "Minimum Floor"
+        distance_to_floor: "Distance to Floor"
+        current: "Current: %{pct}"
+        minimum: "Minimum: %{pct}"
+      data_quality_title: "Data Quality Warning"
+      data_quality_description: "Data quality score is %{score}/100 with %{count} issues detected."
+      nav:
+        overview: "Overview"
