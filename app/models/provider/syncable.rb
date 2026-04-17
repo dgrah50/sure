@@ -9,20 +9,10 @@ module Provider::Syncable
     raise NotImplementedError, "#{self.class} must implement #sync_path"
   end
 
-<<<<<<< HEAD
-  # Returns the provider's item/connection object
-  # @return [Object] The item object (e.g., PlaidItem, SimplefinItem)
-=======
->>>>>>> finos
   def item
     raise NotImplementedError, "#{self.class} must implement #item"
   end
 
-<<<<<<< HEAD
-  # Check if the item is currently syncing
-  # @return [Boolean] True if syncing, false otherwise
-=======
->>>>>>> finos
   def syncing?
     item&.syncing? || false
   end
@@ -33,11 +23,6 @@ module Provider::Syncable
     item&.status
   end
 
-<<<<<<< HEAD
-  # Check if the item requires an update (e.g., re-authentication)
-  # @return [Boolean] True if update required, false otherwise
-=======
->>>>>>> finos
   def requires_update?
     status == "requires_update"
   end

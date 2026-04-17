@@ -274,28 +274,6 @@ module LedgerTestingHelper
           assert_equal adjustments[:non_cash_adjustments], calculated_balance.non_cash_adjustments,
             "Non-cash adjustments mismatch for #{date}" if adjustments.key?(:non_cash_adjustments)
         end
-<<<<<<< HEAD
-
-        # Temporary assertions during migration (remove after migration complete)
-        # TODO: Remove these assertions after migration is complete
-        # Since we're not persisting balances, we calculate the end values
-        flows_factor = calculated_balance.account.classification == "asset" ? 1 : -1
-        expected_end_cash = calculated_balance.start_cash_balance +
-                           ((calculated_balance.cash_inflows - calculated_balance.cash_outflows) * flows_factor) +
-                           calculated_balance.cash_adjustments
-        expected_end_balance = expected_end_cash +
-                              calculated_balance.start_non_cash_balance +
-                              ((calculated_balance.non_cash_inflows - calculated_balance.non_cash_outflows) * flows_factor) +
-                              calculated_balance.net_market_flows +
-                              calculated_balance.non_cash_adjustments
-
-        assert_equal calculated_balance.cash_balance, expected_end_cash,
-          "Temporary assertion failed: end_cash_balance should equal cash_balance for #{date}"
-
-        assert_equal calculated_balance.balance, expected_end_balance,
-          "Temporary assertion failed: end_balance should equal balance for #{date}"
-=======
->>>>>>> finos
       else
         assert_nil calculated_balance, "Unexpected balance calculated for #{date}"
       end

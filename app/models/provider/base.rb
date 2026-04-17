@@ -1,26 +1,4 @@
-<<<<<<< HEAD
-# Base class for all provider adapters
-# Provides common interface for working with different third-party data providers
-#
-# To create a new provider adapter:
-# 1. Inherit from Provider::Base
-# 2. Implement #provider_name
-# 3. Include optional modules (Provider::Syncable, Provider::InstitutionMetadata)
-# 4. Register with Provider::Factory in the class body
-#
-# Example:
-#   class Provider::AcmeAdapter < Provider::Base
-#     Provider::Factory.register("AcmeAccount", self)
-#     include Provider::Syncable
-#     include Provider::InstitutionMetadata
-#
-#     def provider_name
-#       "acme"
-#     end
-#   end
-=======
 # Base class for all provider adapters. Subclasses must implement #provider_name.
->>>>>>> finos
 class Provider::Base
   attr_reader :provider_account, :account
 
@@ -29,11 +7,6 @@ class Provider::Base
     @account = account || provider_account.account
   end
 
-<<<<<<< HEAD
-  # Provider identification - must be implemented by subclasses
-  # @return [String] The provider name (e.g., "plaid", "simplefin")
-=======
->>>>>>> finos
   def provider_name
     raise NotImplementedError, "#{self.class} must implement #provider_name"
   end
@@ -59,11 +32,6 @@ class Provider::Base
     []
   end
 
-<<<<<<< HEAD
-  # Returns the provider type (class name)
-  # @return [String] The provider account class name
-=======
->>>>>>> finos
   def provider_type
     provider_account.class.name
   end

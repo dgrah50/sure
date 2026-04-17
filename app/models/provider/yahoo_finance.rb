@@ -65,13 +65,6 @@ class Provider::YahooFinance < Provider
     end
   end
 
-<<<<<<< HEAD
-  # ================================
-  #          Exchange Rates
-  # ================================
-
-=======
->>>>>>> finos
   def fetch_exchange_rate(from:, to:, date:)
     with_provider_response do
       # Return 1.0 if same currency
@@ -139,13 +132,6 @@ class Provider::YahooFinance < Provider
     end
   end
 
-<<<<<<< HEAD
-  # ================================
-  #           Securities
-  # ================================
-
-=======
->>>>>>> finos
   def search_securities(symbol, country_code: nil, exchange_operating_mic: nil)
     with_provider_response do
       cache_key = "search_#{symbol}_#{country_code}_#{exchange_operating_mic}"
@@ -323,13 +309,7 @@ class Provider::YahooFinance < Provider
       ENV["YAHOO_FINANCE_URL"] || "https://query1.finance.yahoo.com"
     end
 
-<<<<<<< HEAD
-    # ================================
-    #      Currency Normalization
-    # ================================
-=======
     # Currency Normalization
->>>>>>> finos
 
     # Yahoo Finance sometimes returns currencies in minor units (pence, cents)
     # This is not part of ISO 4217 but is a convention used by financial data providers
@@ -350,14 +330,7 @@ class Provider::YahooFinance < Provider
       end
     end
 
-<<<<<<< HEAD
-    # ================================
-    #           Validation
-    # ================================
-
-=======
     # Validation
->>>>>>> finos
 
     def validate_date_range!(start_date, end_date)
       raise Error, "Start date cannot be after end date" if start_date > end_date
@@ -410,13 +383,7 @@ class Provider::YahooFinance < Provider
       end
     end
 
-<<<<<<< HEAD
-    # ================================
-    #           Caching
-    # ================================
-=======
     # Caching
->>>>>>> finos
 
     def get_cached_result(key)
       full_key = "#{@cache_prefix}_#{key}"
@@ -429,15 +396,7 @@ class Provider::YahooFinance < Provider
       Rails.cache.write(full_key, data, expires_in: CACHE_DURATION)
     end
 
-<<<<<<< HEAD
-
-
-    # ================================
-    #         Helper Methods
-    # ================================
-=======
     # Helper Methods
->>>>>>> finos
 
     def generate_same_currency_rates(from, to, start_date, end_date)
       (start_date..end_date).map do |date|
@@ -589,13 +548,7 @@ class Provider::YahooFinance < Provider
       @last_request_time = Time.current
     end
 
-<<<<<<< HEAD
-    # ================================
-    #    Cookie/Crumb Authentication
-    # ================================
-=======
     # Cookie/Crumb Authentication
->>>>>>> finos
 
     # Fetches and caches the Yahoo Finance cookie and crumb for authenticated endpoints
     # The crumb is a CSRF token required by some Yahoo Finance endpoints (e.g., quoteSummary)

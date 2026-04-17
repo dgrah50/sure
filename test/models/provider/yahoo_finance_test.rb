@@ -5,15 +5,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     @provider = Provider::YahooFinance.new
   end
 
-<<<<<<< HEAD
-  # ================================
-  #        Health Check Tests
-  # ================================
-=======
 
   #        Health Check Tests
 
->>>>>>> finos
 
   test "healthy? returns true when API is working" do
     mock_response = mock
@@ -52,15 +46,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert @provider.healthy?
   end
 
-<<<<<<< HEAD
-  # ================================
-  #      Exchange Rate Tests
-  # ================================
-=======
 
   #      Exchange Rate Tests
 
->>>>>>> finos
 
   test "fetch_exchange_rate returns 1.0 for same currency" do
     date = Date.parse("2024-01-15")
@@ -115,15 +103,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_instance_of Provider::YahooFinance::Error, response.error
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Security Search Tests
-  # ================================
-=======
 
   #       Security Search Tests
 
->>>>>>> finos
 
   test "search_securities handles invalid symbols" do
     # With validation removed, invalid symbols will result in API errors
@@ -153,15 +135,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_equal [], response.data
   end
 
-<<<<<<< HEAD
-  # ================================
-  #     Security Price Tests
-  # ================================
-=======
 
   #     Security Price Tests
 
->>>>>>> finos
 
   test "fetch_security_price handles invalid symbol" do
     date = Date.parse("2024-01-15")
@@ -172,28 +148,16 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_instance_of Provider::YahooFinance::Error, response.error
   end
 
-<<<<<<< HEAD
-  # ================================
-  #         Caching Tests
-  # ================================
-=======
 
   #         Caching Tests
 
->>>>>>> finos
 
   # Note: Caching tests are skipped as Rails.cache may not be properly configured in test environment
   # and caching functionality is not the focus of the validation fixes
 
-<<<<<<< HEAD
-  # ================================
-  #       Error Handling Tests
-  # ================================
-=======
 
   #       Error Handling Tests
 
->>>>>>> finos
 
   test "handles Faraday errors gracefully" do
     # Mock a Faraday error
@@ -230,15 +194,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     end
   end
 
-<<<<<<< HEAD
-  # ================================
-  #     User-Agent Rotation Tests
-  # ================================
-=======
 
   #     User-Agent Rotation Tests
 
->>>>>>> finos
 
   test "random_user_agent returns value from USER_AGENTS pool" do
     user_agent = @provider.send(:random_user_agent)
@@ -250,15 +208,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert Provider::YahooFinance::USER_AGENTS.all? { |ua| ua.include?("Mozilla") }
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Throttling Tests
-  # ================================
-=======
 
   #       Throttling Tests
 
->>>>>>> finos
 
   test "throttle_request enforces minimum interval between requests" do
     # First request should not wait
@@ -275,15 +227,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert second_elapsed >= (min_interval - 0.05), "Second request should wait at least #{min_interval - 0.05}s"
   end
 
-<<<<<<< HEAD
-  # ================================
-  #    Configuration Tests
-  # ================================
-=======
 
   #    Configuration Tests
 
->>>>>>> finos
 
   test "max_retries returns default value" do
     assert_equal 5, @provider.send(:max_retries)
@@ -297,15 +243,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_equal 0.5, @provider.send(:min_request_interval)
   end
 
-<<<<<<< HEAD
-  # ================================
-  #  Cookie/Crumb Authentication Tests
-  # ================================
-=======
 
   #  Cookie/Crumb Authentication Tests
 
->>>>>>> finos
 
   test "extract_cookie extracts cookie from set-cookie header" do
     mock_response = OpenStruct.new(
@@ -346,15 +286,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     assert_nil Rails.cache.read("yahoo_finance_auth_crumb")
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Helper Method Tests
-  # ================================
-=======
 
   #       Helper Method Tests
 
->>>>>>> finos
 
   test "map_country_code returns correct codes for exchanges" do
     assert_equal "US", @provider.send(:map_country_code, "NASDAQ")
@@ -404,15 +338,9 @@ class Provider::YahooFinanceTest < ActiveSupport::TestCase
     end
   end
 
-<<<<<<< HEAD
-  # ================================
-  #   Currency Normalization Tests
-  # ================================
-=======
 
   #   Currency Normalization Tests
 
->>>>>>> finos
 
   test "normalize_currency_and_price converts GBp to GBP" do
     currency, price = @provider.send(:normalize_currency_and_price, "GBp", 1234.56)

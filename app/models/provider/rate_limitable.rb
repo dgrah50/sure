@@ -1,24 +1,5 @@
-<<<<<<< HEAD
-# Shared concern for providers that need interval-based request throttling
-# and a standard error transformation pattern.
-#
-# Providers that include this concern get:
-# - `throttle_request`: sleeps to enforce MIN_REQUEST_INTERVAL between calls
-# - `min_request_interval`: reads from ENV with fallback to the class constant
-# - `default_error_transformer`: maps Faraday/rate-limit errors to provider-scoped types
-#
-# The including class MUST define:
-# - `MIN_REQUEST_INTERVAL` (Float) — default seconds between requests
-# - `Error` (Class)           — provider-scoped error class
-# - `RateLimitError` (Class)  — provider-scoped rate-limit error class
-#
-# And MAY define a `PROVIDER_ENV_PREFIX` constant (e.g. "ALPHA_VANTAGE") used
-# to derive the ENV key for the min request interval override.  When omitted
-# the prefix is derived from the class name (Provider::AlphaVantage → "ALPHA_VANTAGE").
-=======
 # Shared concern for interval-based request throttling and error transformation.
 # The including class MUST define MIN_REQUEST_INTERVAL, Error, and RateLimitError constants.
->>>>>>> finos
 module Provider::RateLimitable
   extend ActiveSupport::Concern
 

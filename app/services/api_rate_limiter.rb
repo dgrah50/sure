@@ -13,10 +13,6 @@ class ApiRateLimiter
     @redis = Redis.new
   end
 
-<<<<<<< HEAD
-  # Check if the API key has exceeded its rate limit
-=======
->>>>>>> finos
   def rate_limit_exceeded?
     current_count >= rate_limit
   end

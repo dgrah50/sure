@@ -303,11 +303,7 @@ class Settings::HostingsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-<<<<<<< HEAD
-  # --- Securities provider toggle ---
-=======
 
->>>>>>> finos
 
   test "can update securities providers" do
     with_self_hosting do

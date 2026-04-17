@@ -10,13 +10,7 @@ module FeatureFlags
       # do not attempt to query SSO provider tables before migrations run.
       return false if Rails.env.production?
 
-<<<<<<< HEAD
-      auth_source = Rails.configuration.app_mode.self_hosted? ? "db" : "yaml"
-
-      auth_source.to_s.downcase == "db"
-=======
       Rails.configuration.app_mode.self_hosted?
->>>>>>> finos
     end
 
     def intro_ui?

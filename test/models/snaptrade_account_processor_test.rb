@@ -20,11 +20,7 @@ class SnaptradeAccountProcessorTest < ActiveSupport::TestCase
     @snaptrade_account.reload
   end
 
-<<<<<<< HEAD
-  # === HoldingsProcessor Tests ===
-=======
 
->>>>>>> finos
 
   test "holdings processor creates holdings from raw payload" do
     security = securities(:aapl)
@@ -133,11 +129,7 @@ class SnaptradeAccountProcessorTest < ActiveSupport::TestCase
     assert_equal 0, @account.holdings.count
   end
 
-<<<<<<< HEAD
-  # === ActivitiesProcessor Tests ===
-=======
 
->>>>>>> finos
 
   test "activities processor maps BUY type to Buy label" do
     security = securities(:aapl)

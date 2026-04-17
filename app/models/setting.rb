@@ -244,10 +244,6 @@ class Setting < RailsSettings::Base
       where(var: dynamic_key_name(key_str)).exists?
     end
 
-<<<<<<< HEAD
-    # Delete a dynamic field
-=======
->>>>>>> finos
     def delete(key)
       key_str = key.to_s
       return nil if respond_to?(key_str) # Can't delete declared fields

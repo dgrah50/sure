@@ -1,24 +1,8 @@
 class SnaptradeItem < ApplicationRecord
-<<<<<<< HEAD
-  include Syncable, Provided, Unlinking
-
-  enum :status, { good: "good", requires_update: "requires_update" }, default: :good
-
-  # Helper to detect if ActiveRecord Encryption is configured for this app
-  def self.encryption_ready?
-    creds_ready = Rails.application.credentials.active_record_encryption.present?
-    env_ready = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"].present? &&
-                ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"].present? &&
-                ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"].present?
-    creds_ready || env_ready
-  end
-
-=======
   include Syncable, Provided, Unlinking, EncryptableItem
 
   enum :status, { good: "good", requires_update: "requires_update" }, default: :good
 
->>>>>>> finos
   # Encrypt sensitive credentials if ActiveRecord encryption is configured
   # client_id/consumer_key use deterministic encryption (may need querying)
   # snaptrade_user_secret uses non-deterministic (more secure for pure secrets)
@@ -197,10 +181,6 @@ class SnaptradeItem < ApplicationRecord
     snaptrade_accounts.joins(:account_provider)
   end
 
-<<<<<<< HEAD
-  # Get all Sure accounts linked to this SnapTrade item
-=======
->>>>>>> finos
   def accounts
     snaptrade_accounts
       .includes(account_provider: :account)

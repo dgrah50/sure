@@ -111,12 +111,6 @@ class SnaptradeAccount::ActivitiesProcessor
       raw_symbol_wrapper = data["symbol"] || data[:symbol] || {}
       symbol_wrapper = raw_symbol_wrapper.is_a?(Hash) ? raw_symbol_wrapper.with_indifferent_access : {}
 
-<<<<<<< HEAD
-      # Get the symbol field - could be a string (ticker) or nested object
-      raw_symbol_data = symbol_wrapper["symbol"] || symbol_wrapper[:symbol]
-
-=======
->>>>>>> finos
       # Determine ticker based on data type
       if raw_symbol_data.is_a?(String)
         # Activities: symbol.symbol is the ticker string directly
@@ -172,10 +166,6 @@ class SnaptradeAccount::ActivitiesProcessor
         return
       end
 
-<<<<<<< HEAD
-      # Get the activity date
-=======
->>>>>>> finos
       activity_date = parse_date(data[:settlement_date]) || parse_date(data["settlement_date"]) ||
                       parse_date(data[:trade_date]) || parse_date(data["trade_date"]) || Date.current
 
@@ -213,10 +203,6 @@ class SnaptradeAccount::ActivitiesProcessor
                parse_decimal(data[:net_amount]) || parse_decimal(data["net_amount"])
       return if amount.nil? || amount.zero?
 
-<<<<<<< HEAD
-      # Get the activity date
-=======
->>>>>>> finos
       activity_date = parse_date(data[:settlement_date]) || parse_date(data["settlement_date"]) ||
                       parse_date(data[:trade_date]) || parse_date(data["trade_date"]) || Date.current
 

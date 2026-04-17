@@ -2,25 +2,6 @@ require "test_helper"
 
 class Provider::RegistryTest < ActiveSupport::TestCase
   test "providers filters out nil values when provider is not configured" do
-<<<<<<< HEAD
-    # Ensure OpenAI is not configured
-    ClimateControl.modify("OPENAI_ACCESS_TOKEN" => nil) do
-      Setting.stubs(:openai_access_token).returns(nil)
-
-      registry = Provider::Registry.for_concept(:llm)
-
-      # Should return empty array instead of [nil]
-      assert_equal [], registry.providers
-    end
-  end
-
-  test "providers returns configured providers" do
-    # Mock a configured OpenAI provider
-    mock_provider = mock("openai_provider")
-    Provider::Registry.stubs(:openai).returns(mock_provider)
-
-    registry = Provider::Registry.for_concept(:llm)
-=======
     # Create registry with empty config to ensure OpenAI is not configured
     config = Provider::Registry::Config.new(
       openai_access_token: nil,
@@ -38,17 +19,12 @@ class Provider::RegistryTest < ActiveSupport::TestCase
     mock_provider = mock("openai_provider")
     registry = Provider::Registry.new(:llm, Provider::Registry::Config.new)
     registry.stubs(:openai).returns(mock_provider)
->>>>>>> finos
 
     assert_equal [ mock_provider ], registry.providers
   end
 
   test "get_provider raises error when provider not found for concept" do
-<<<<<<< HEAD
-    registry = Provider::Registry.for_concept(:llm)
-=======
     registry = Provider::Registry.new(:llm, Provider::Registry::Config.new)
->>>>>>> finos
 
     error = assert_raises(Provider::Registry::Error) do
       registry.get_provider(:nonexistent)
@@ -58,17 +34,6 @@ class Provider::RegistryTest < ActiveSupport::TestCase
   end
 
   test "get_provider returns nil when provider not configured" do
-<<<<<<< HEAD
-    # Ensure OpenAI is not configured
-    ClimateControl.modify("OPENAI_ACCESS_TOKEN" => nil) do
-      Setting.stubs(:openai_access_token).returns(nil)
-
-      registry = Provider::Registry.for_concept(:llm)
-
-      # Should return nil when provider method exists but returns nil
-      assert_nil registry.get_provider(:openai)
-    end
-=======
     # Create registry with empty config
     config = Provider::Registry::Config.new(
       openai_access_token: nil,
@@ -79,7 +44,6 @@ class Provider::RegistryTest < ActiveSupport::TestCase
 
     # Should return nil when provider method exists but returns nil
     assert_nil registry.get_provider(:openai)
->>>>>>> finos
   end
 
   test "openai provider falls back to Setting when ENV is empty string" do
@@ -94,11 +58,8 @@ class Provider::RegistryTest < ActiveSupport::TestCase
       Setting.stubs(:openai_uri_base).returns(nil)
       Setting.stubs(:openai_model).returns(nil)
 
-<<<<<<< HEAD
-=======
       # Uses global instance which loads from ENV/Setting
       Provider::Registry.reset_instance!
->>>>>>> finos
       provider = Provider::Registry.get_provider(:openai)
 
       # Should successfully create provider using Setting value
@@ -106,8 +67,6 @@ class Provider::RegistryTest < ActiveSupport::TestCase
       assert_instance_of Provider::Openai, provider
     end
   end
-<<<<<<< HEAD
-=======
 
   test "allows configuration injection for testing without ENV" do
     config = Provider::Registry::Config.new(
@@ -148,5 +107,4 @@ class Provider::RegistryTest < ActiveSupport::TestCase
 
     assert_equal mock_provider, Provider::Registry.get_provider(:twelve_data)
   end
->>>>>>> finos
 end

@@ -28,11 +28,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     @importer = EnableBankingItem::Importer.new(@enable_banking_item, enable_banking_provider: @mock_provider)
   end
 
-<<<<<<< HEAD
-  # --- Post-fetch date filtering ---
-=======
   
->>>>>>> finos
 
   test "filters out transactions before sync_start_date" do
     old_tx = {
@@ -102,11 +98,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     assert_equal 1, result.count
   end
 
-<<<<<<< HEAD
-  # --- PDNG transaction tagging ---
-=======
 
->>>>>>> finos
 
   test "tags PDNG transactions with pending: true in extra" do
     pdng_tx = {
@@ -140,11 +132,7 @@ class EnableBankingItem::ImporterPdngTest < ActiveSupport::TestCase
     assert_equal true, result.first[:_pending]
   end
 
-<<<<<<< HEAD
-  # --- identification_hashes matching ---
-=======
   
->>>>>>> finos
 
   test "find_enable_banking_account_by_hash uses identification_hashes for matching" do
     # Account already exists with uid = identification_hash

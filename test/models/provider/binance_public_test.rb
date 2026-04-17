@@ -6,15 +6,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     @provider.stubs(:throttle_request)
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Search
-  # ================================
-=======
 
   #       Search
 
->>>>>>> finos
 
   test "search_securities returns one result per supported quote" do
     @provider.stubs(:exchange_info_symbols).returns(sample_exchange_info)
@@ -145,15 +139,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_empty tickers
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Ticker parsing
-  # ================================
-=======
 
   #       Ticker parsing
 
->>>>>>> finos
 
   test "parse_ticker maps USD suffix to USDT pair" do
     parsed = @provider.send(:parse_ticker, "BTCUSD")
@@ -174,15 +162,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_nil @provider.send(:parse_ticker, "GIBBERISH")
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Single price
-  # ================================
-=======
 
   #       Single price
 
->>>>>>> finos
 
   test "fetch_security_price returns Price for a single day" do
     mock_client_returning_klines([
@@ -226,15 +208,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_instance_of Provider::BinancePublic::InvalidSecurityPriceError, response.error
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Historical prices
-  # ================================
-=======
 
   #       Historical prices
 
->>>>>>> finos
 
   test "fetch_security_prices returns rows across a small range" do
     rows = (0..4).map { |i| kline_row(Date.parse("2026-01-01") + i.days, (40000 + i).to_s) }
@@ -416,15 +392,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_instance_of Provider::BinancePublic::InvalidSecurityPriceError, response.error
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Info
-  # ================================
-=======
 
   #       Info
 
->>>>>>> finos
 
   test "fetch_security_info returns crypto kind and nil logo_url" do
     response = @provider.fetch_security_info(symbol: "BTCUSD", exchange_operating_mic: "BNCX")
@@ -439,15 +409,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_nil response.data.logo_url
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Quote currency coverage
-  # ================================
-=======
 
   #       Quote currency coverage
 
->>>>>>> finos
 
   test "parse_ticker rejects GBP (unsupported)" do
     assert_nil @provider.send(:parse_ticker, "BTCGBP")
@@ -496,15 +460,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert_equal "BRL", response.data.first.currency
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Logo URL plumbing
-  # ================================
-=======
 
   #       Logo URL plumbing
 
->>>>>>> finos
 
   test "search_securities populates each result with the Brandfetch crypto URL" do
     @provider.stubs(:exchange_info_symbols).returns(sample_exchange_info)
@@ -526,15 +484,9 @@ class Provider::BinancePublicTest < ActiveSupport::TestCase
     assert response.data.all? { |s| s.logo_url.nil? }
   end
 
-<<<<<<< HEAD
-  # ================================
-  #       Helpers
-  # ================================
-=======
 
   #       Helpers
 
->>>>>>> finos
 
   private
 

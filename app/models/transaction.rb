@@ -50,10 +50,6 @@ class Transaction < ApplicationRecord
       if extra&.dig("exchange_rate_invalid")
         errors.add(:exchange_rate, "must be a number")
       elsif exchange_rate.present?
-<<<<<<< HEAD
-        # Convert to float for comparison
-        numeric_rate = exchange_rate.to_d rescue nil
-=======
         # Convert to decimal for validation
         begin
           numeric_rate = exchange_rate.to_d
@@ -61,22 +57,12 @@ class Transaction < ApplicationRecord
           Rails.logger.error("Invalid exchange rate format: #{exchange_rate.inspect} for transaction #{id}")
           numeric_rate = nil
         end
->>>>>>> finos
         if numeric_rate.nil? || numeric_rate <= 0
           errors.add(:exchange_rate, "must be greater than 0")
         end
       end
     end
 
-<<<<<<< HEAD
-  public
-
-  enum :kind, {
-    standard: "standard" # A regular transaction
-  }
-
-=======
->>>>>>> finos
   # Providers that support pending transaction flags
   PENDING_PROVIDERS = %w[simplefin plaid lunchflow enable_banking].freeze
 
