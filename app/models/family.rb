@@ -210,6 +210,9 @@ class Family < ApplicationRecord
     Rails.application.config.app_mode.self_hosted?
   end
 
+<<<<<<< HEAD
+  private
+=======
   # Provider Service Delegations
   # These methods delegate to service classes to avoid bloating the model
   # with provider-specific logic, respecting Single Responsibility Principle.
@@ -315,6 +318,7 @@ class Family < ApplicationRecord
       @indexa_capital_service ||= Family::IndexaCapitalService.new(self)
     end
 
+>>>>>>> finos
     def normalize_enabled_currencies!
       if enabled_currencies.blank?
         self.enabled_currencies = nil
